@@ -17,8 +17,13 @@ import {
   CToastHeader,
   CToastBody,
   CToaster,
-  CAlert
+  CAlert,
+  CTooltip
 } from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import {
+    cilCloudDownload
+  } from '@coreui/icons'
 import {employeeRoles} from "../../utils/emp_utils";
 import {useForm} from "react-hook-form";
 import axios from 'axios';
@@ -30,7 +35,7 @@ const EmployeeDetailForm = ()=>{
     const [empdata, setEmpdata] = useState({});
     const [btnname, setBtnname] = useState('Save')
     const toaster = useRef()
-    const {register, handleSubmit, watch, formState:{errors}} = useForm()
+    const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
     const {empid} = useParams();
     console.log(errors)
     const headers = {
@@ -72,8 +77,21 @@ const EmployeeDetailForm = ()=>{
         const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/getuser/${empid}`
        // console.log(url)    
         let response = await axios.get(url)
-        //console.log(response.data.data)
+        console.log(response.data.data)
+        const users = response.data.data;
         setEmpdata((response.data.data))
+        setValue("empno",users.empno)
+        setValue("name",users.name)
+        setValue("dob",users.dob)
+        setValue("gender",users.gender)
+        setValue("address",users.address)
+        setValue("country",users.country)
+        setValue("phone",users.phoneno)
+        setValue("email",users.email)
+        setValue("emp_type",users.employee_type)
+        setValue("emp_role",users.employee_role)
+        setValue("salary",users.salary)
+        setValue("canlogin",(users.canlogin)?true:false)
         
     }
    
@@ -84,7 +102,7 @@ const EmployeeDetailForm = ()=>{
             UserData(empid)
             
         }
-    },[])
+    },[setValue])
     
    // console.log(empdata)
     
@@ -128,7 +146,7 @@ return(
                             label="Male"
                             value="male"
                             {...register("gender",{required:"Gender is required"})} 
-                            defaultChecked={(empdata?.gender && empdata.gender=='male')?true:false}
+                            
                         />
                         <CFormCheck
                             inline
@@ -138,7 +156,7 @@ return(
                             label="Female"
                             value="female"
                             {...register("gender",{required:"Gender is required"})} 
-                            defaultChecked={(empdata?.gender && empdata.gender=='female')?true:false}
+                           
                         />
                         </div>
                         {errors.gender && <code color="danger">{errors.gender?.message}</code>}
@@ -165,12 +183,20 @@ return(
                         {errors.email && <code color="danger">{errors.email?.message}</code>}
                     </CCol>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="userphoto">Photo <code color="danger">*</code></CFormLabel>
+                        <CFormLabel htmlFor="userphoto">Photo <code color="danger">*</code>
+                        {
+                            empdata.employee_photo !='' ?(
+                            <CTooltip content="Download" >
+                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empdata.employee_photo} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
+                            </CTooltip>):null
+                        }
+                        </CFormLabel>
                         <CFormInput type="file" id="userphoto"   {...register("userphoto")} />
                         {
                             //,{required:"Photo is required"}
                         }
                         {errors.userphoto && <code color="danger">{errors.userphoto?.message}</code>}
+                        
                     </CCol>
                     <CCol md={3}>
                         <CFormLabel htmlFor="emp_type">Employee Type <code color="danger">*</code></CFormLabel>
@@ -183,7 +209,7 @@ return(
                             label="Own"
                             value="own"
                             {...register("emp_type",{required:"Employee type is required"})} 
-                            defaultChecked={(empdata?.employee_type && empdata.employee_type=='own')?true:false}
+                            
                         />
                         <CFormCheck
                             inline
@@ -193,7 +219,7 @@ return(
                             label="Out Source"
                             value="outsource"
                             {...register("emp_type",{required:"Employee type is required"})} 
-                            defaultChecked={(empdata?.employee_type && empdata.employee_type=='outsource')?true:false}
+                            
                         />
                         </div>
                         {errors.emp_type && <code color="danger">{errors.emp_type?.message}</code>}
@@ -204,7 +230,7 @@ return(
                         <CFormSelect id="emp_role" 
                         options={employeeRoles}
                         {...register("emp_role", {required:"Employee role is required"})}
-                        value={empdata?.employee_role}
+                        
                         />
                         {errors.emp_role && <code color="danger">{errors.emp_role?.message}</code>}
                     </CCol>
@@ -218,7 +244,7 @@ return(
                     
                     <CCol md={3}>
                         <CFormLabel htmlFor="canlogin">Provide Login </CFormLabel>
-                        <CFormCheck id="canlogin"  {...register("canlogin")} value="1" defaultChecked={(empdata?.canlogin && empdata.canlogin==1)?true:false}/>
+                        <CFormCheck id="canlogin"  {...register("canlogin")} value="1" />
                        
                        
                         {errors.canlogin && <code color="danger">{errors.canlogin?.message}</code>}

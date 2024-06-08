@@ -1,6 +1,44 @@
+import React, {useEffect, useState} from "react";
+import axios from "axios";
+import {
+    CCard,
+    CCardBody,
+    CCol,
+    CTabs,
+    CTabList,
+    CTab,
+    CTabContent,
+    CTabPanel
+  } from '@coreui/react';
+  
+import EmployeeListTable from "./EmployeeListTable"
 const ListEmployee = ()=>{
+    const [usersdata, setUsersdata] = useState({});
+    const [currentPage, setCurrentPage] = useState(1)
+    const UserBasicData = async () =>{
+        
+        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/listuser?currentpage=${currentPage}`
+       // console.log(url)    
+        let response = await axios.get(url)
+        //console.log(response.data.data)
+        const users = response.data.data;
+        setCurrentPage(users.current_page)
+        setUsersdata(users)
+    }
+    useEffect(()=>{
+           UserBasicData()
+    },[])
+    const handleClickPagination = (pageno)=>{ console.log(pageno)
+        //setCurrentPage(pageno)
+    }
     return(
-        <div>Employee List Page</div>
+        <CCol xs={12}>
+            <CCard className="mb-4">
+                <CCardBody>
+                    <EmployeeListTable tblheading="Employee List" users={usersdata}  />
+                </CCardBody>
+            </CCard>
+        </CCol>
     )
 }
 

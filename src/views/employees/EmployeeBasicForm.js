@@ -6,8 +6,13 @@ import {
     CFormInput,
     CFormFeedback,
     CFormLabel,
-    CToaster
+    CToaster,
+    CTooltip
   } from '@coreui/react'
+  import CIcon from '@coreui/icons-react'
+  import {
+    cilCloudDownload
+  } from '@coreui/icons'
 import {useForm} from "react-hook-form";
 import {useParams} from 'react-router-dom'
 import axios from "axios";
@@ -17,7 +22,7 @@ const EmployeeBasicForm = ()=>{
     const toaster = useRef()
     const [empbasicdata, setEmpbasicdata] = useState({});
     const {empid} = useParams();
-    const {register, handleSubmit, watch, formState:{errors}} = useForm()
+    const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
@@ -45,7 +50,14 @@ const EmployeeBasicForm = ()=>{
        // console.log(url)    
         let response = await axios.get(url)
         console.log(response.data.data)
-        setEmpbasicdata((response.data.data))
+        const users = response.data.data;
+        setEmpbasicdata(users)
+        setValue("passport",users?.passport)
+        setValue("visaexpiry",users?.visa_expiry)
+        setValue("eid",users?.eid_expiry)
+        setValue("workpermit",users?.work_permit)
+        setValue("personalno",users?.personal_no)
+        setValue("personalaccno",users?.personal_acc_no)
         
     }
     useEffect(()=>{
@@ -55,7 +67,7 @@ const EmployeeBasicForm = ()=>{
             UserBasicData(empid)
             
         }
-    },[])
+    },[setValue])
     return(
         <CCol xs={12}>
             <CToaster className="p-3" placement="top-end" push={toast} ref={toaster} />
@@ -65,53 +77,83 @@ const EmployeeBasicForm = ()=>{
                 >
                 <CCol md={6}>
                     <CFormLabel htmlFor="passport">Passport <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="passport" defaultValue={empbasicdata?.passport}  {...register("passport", {required:'Passport is required'})}  /> 
+                    <CFormInput type="text" id="passport"   {...register("passport", {required:'Passport is required'})}  /> 
                     {errors.passport && <code color="danger">{errors.passport?.message}</code>}
                 </CCol>
                 <CCol md={6}>
-                    <CFormLabel htmlFor="passportupload">Passport Upload <code color="danger">*</code></CFormLabel>
+                    <CFormLabel htmlFor="passportupload">Passport Upload <code color="danger">*</code>
+                        {
+                            empbasicdata.passport_url !='' ?(
+                            <CTooltip content="Download" >
+                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata.passport_url} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
+                            </CTooltip>):null
+                        }
+                    </CFormLabel>
                     <CFormInput type="file" id="passportupload" {...register("passportupload")}  />
                     {errors.passportupload && <code color="danger">{errors.passportupload?.message}</code>}
                 </CCol>
                 
                 <CCol md={6}>
-                    <CFormLabel htmlFor="visaexpiry">Visa Expiry <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="visaexpiry" defaultValue={empbasicdata?.visa_expiry}   {...register("visaexpiry", {required:'Visa exipry is required'})}  /> 
+                    <CFormLabel htmlFor="visaexpiry">Visa Expiry <code color="danger">*</code>
+                        
+                    </CFormLabel>
+                    <CFormInput type="text" id="visaexpiry" {...register("visaexpiry", {required:'Visa exipry is required'})}  /> 
                     {errors.visaexpiry && <code color="danger">{errors.visaexpiry?.message}</code>}
                 </CCol>
                 <CCol md={6}>
-                    <CFormLabel htmlFor="visaupload">Visa Upload <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="file" id="visaupload" defaultValue=""  {...register("visaupload")}  />
+                    <CFormLabel htmlFor="visaupload">Visa Upload <code color="danger">*</code>
+                     {
+                            empbasicdata.visa_expiry_upload !='' ?(
+                            <CTooltip content="Download" >
+                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata.visa_expiry_upload} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
+                            </CTooltip>):null
+                        }
+                    </CFormLabel>
+                    <CFormInput type="file" id="visaupload"   {...register("visaupload")} />
                     {errors.visaupload && <code color="danger">{errors.visaupload?.message}</code>}
                 </CCol>
                 
                 <CCol md={6}>
                     <CFormLabel htmlFor="eid">Eid <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="eid"  defaultValue={empbasicdata?.eid_expiry}   {...register("eid", {required:'Eid is required'})}  /> 
+                    <CFormInput type="text" id="eid"    {...register("eid", {required:'Eid is required'})}  /> 
                     {errors.eid && <code color="danger">{errors.eid?.message}</code>}
                 </CCol>
                 <CCol md={6}>
-                    <CFormLabel htmlFor="eidupload">Eid Upload <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="file" id="eidupload" defaultValue=""  {...register("eidupload")}  />
+                    <CFormLabel htmlFor="eidupload">Eid Upload <code color="danger">*</code>
+                     {
+                            empbasicdata.eid_expiry_upload !='' ?(
+                            <CTooltip content="Download" >
+                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata.eid_expiry_upload} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
+                            </CTooltip>):null
+                        }
+                    </CFormLabel>
+                    <CFormInput type="file" id="eidupload"  {...register("eidupload")}/>
                     {errors.eidupload && <code color="danger">{errors.eidupload?.message}</code>}
                 </CCol>
                 <CCol md={3}>
                     <CFormLabel htmlFor="workpermit">Work Permit <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="workpermit" defaultValue={empbasicdata?.work_permit}   {...register("workpermit", {required:'Work Permit is required'})}  /> 
+                    <CFormInput type="text" id="workpermit"    {...register("workpermit", {required:'Work Permit is required'})}  /> 
                     {errors.workpermit && <code color="danger">{errors.workpermit?.message}</code>}
                 </CCol>
                 <CCol md={3}>
                     <CFormLabel htmlFor="personalno">Personal Number <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="personalno" defaultValue={empbasicdata?.personal_no}   {...register("personalno", {required:'Personal Number is required'})}  /> 
+                    <CFormInput type="text" id="personalno"   {...register("personalno", {required:'Personal Number is required'})}  /> 
                     {errors.personalno && <code color="danger">{errors.personalno?.message}</code>}
                 </CCol>
                 <CCol md={3}>
                     <CFormLabel htmlFor="personalaccno">Personal Account Number<code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="personalaccno" defaultValue={empbasicdata?.personal_acc_no}  {...register("personalaccno", {required:'Personal Acc no is required'})}  /> 
+                    <CFormInput type="text" id="personalaccno"   {...register("personalaccno", {required:'Personal Acc no is required'})}  /> 
                     {errors.personalaccno && <code color="danger">{errors.personalaccno?.message}</code>}
                 </CCol>
                 <CCol md={3}>
-                    <CFormLabel htmlFor="labourcardupload">Labour Card Upload <code color="danger">*</code></CFormLabel>
+                    <CFormLabel htmlFor="labourcardupload">Labour Card Upload <code color="danger">*</code>
+                    {
+                            empbasicdata.labour_card_upload !='' ?(
+                            <CTooltip content="Download" >
+                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata.labour_card_upload} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
+                            </CTooltip>):null
+                        }
+                    </CFormLabel>
                     <CFormInput type="file" id="labourcardupload" defaultValue=""  {...register("labourcardupload")}  />
                     {errors.labourcardupload && <code color="danger">{errors.labourcardupload?.message}</code>}
                 </CCol>

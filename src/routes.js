@@ -60,7 +60,7 @@ const ListEmployee  = React.lazy(() => import('./views/employees/ListEmployee'))
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/theme', name: 'Theme', element: Colors, exact: true },
+ /* { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
   { path: '/base', name: 'Base', element: Cards, exact: true },
@@ -101,11 +101,10 @@ const routes = [
   { path: '/notifications/badges', name: 'Badges', element: Badges },
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
-  { path: '/widgets', name: 'Widgets', element: Widgets },
-  { path: '/employee/addemployee', name: 'Employee', element: AddEmployee },
-  { path: '/employee/addemployee/', name: 'Employee', element: AddEmployee },
-  { path: '/employee/addemployee/:empid', name: 'Employee', element: AddEmployee },
-  { path: '/employee/listemployee', name: 'Employee', element: ListEmployee },
+  { path: '/widgets', name: 'Widgets', element: Widgets },*/
+  { path: '/employee/addemployee', name: 'Add Employee', element: AddEmployee },
+  { path: '/employee/addemployee/:empid', name: 'Edit Employee', element: AddEmployee },
+  { path: '/employee/listemployee', name: 'Employee List', element: ListEmployee },
 ]
 
 export default routes
