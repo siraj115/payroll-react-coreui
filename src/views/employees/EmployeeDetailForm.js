@@ -13,11 +13,7 @@ import {
   CFormLabel,
   CFormSelect,
   CFormTextarea,
-  CToast,
-  CToastHeader,
-  CToastBody,
   CToaster,
-  CAlert,
   CTooltip
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -25,6 +21,7 @@ import {
     cilCloudDownload
   } from '@coreui/icons'
 import {employeeRoles} from "../../utils/emp_utils";
+import {countrycodes} from "../../utils/contryCodes"
 import {useForm} from "react-hook-form";
 import axios from 'axios';
 import UserToaster from '../../utils/UserToaster';
@@ -34,10 +31,11 @@ const EmployeeDetailForm = ()=>{
     const [toast, addToast] = useState(0);
     const [empdata, setEmpdata] = useState({});
     const [btnname, setBtnname] = useState('Save')
+    const [countryCode, setcountryCode] = useState('')
     const toaster = useRef()
     const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
     const {empid} = useParams();
-    console.log(errors)
+    //console.log(errors)
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
@@ -87,6 +85,7 @@ const EmployeeDetailForm = ()=>{
         setValue("address",users.address)
         setValue("country",users.country)
         setValue("phone",users.phoneno)
+        setValue("workphone",users.workphone)
         setValue("email",users.email)
         setValue("emp_type",users.employee_type)
         setValue("emp_role",users.employee_role)
@@ -105,7 +104,14 @@ const EmployeeDetailForm = ()=>{
     },[setValue])
     
    // console.log(empdata)
-    
+    const handleSelectCountry = (e)=>{
+        console.log(e.target.value)
+        const countryname = e.target.value;
+        const country = countrycodes.find(c=>c.name.toLocaleLowerCase() === countryname.toLocaleLowerCase())
+        console.log(country)
+       // setcountryCode(country.dial_code)
+        //setValue("country",countryCode)
+    }
 return(
     <CCol xs={12}>
         <CCard className="mb-4">
@@ -121,8 +127,9 @@ return(
                     >
                     <CCol md={3}>
                         <CFormLabel htmlFor="empno">Emp No</CFormLabel>
-                        <CFormInput type="number" {...register("empno")} defaultValue={empdata?.empno}  /> 
+                        <CFormInput type="number" {...register("empno", {required:"Emp No is required"})} defaultValue={empdata?.empno}  /> 
                         <CFormFeedback valid>Looks good!</CFormFeedback>
+                        {errors.empno && <code color="danger">{errors.empno?.message}</code>}
                     </CCol>
                     <CCol md={3}>
                         <CFormLabel htmlFor="name">Name <code color="danger">*</code></CFormLabel>
@@ -162,30 +169,41 @@ return(
                         {errors.gender && <code color="danger">{errors.gender?.message}</code>}
                     </CCol>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="validationCustom03">Address <code color="danger">*</code></CFormLabel>
+                        <CFormLabel htmlFor="address">Address <code color="danger">*</code></CFormLabel>
                         <CFormTextarea  id="address"   {...register("address",{required:"Address is required"})} defaultValue={empdata?.address}/>
                         {errors.address && <code color="danger">{errors.address?.message}</code>}
                     </CCol>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="validationCustom03">Country <code color="danger">*</code></CFormLabel>
-                        <CFormInput type="text" id="country"   {...register("country",{required:"Country is required"})} defaultValue={empdata?.country} />
+                        <CFormLabel htmlFor="country">Country <code color="danger">*</code></CFormLabel>
+                        
+                       <CFormSelect id="country" name="country" onChange={()=>{handleSelectCountry(event)}} {...register("country",{required:"Country is required"})}>
+                            <option value="">Select Country</option>
+                            {countrycodes.map((country)=>{
+                               return (<option value={country.name} key={country.code}>{country.name}</option>)
+                            })}
+                       </CFormSelect>
                         {errors.country && <code color="danger">{errors.country?.message}</code>}
                     </CCol>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="phone">Phone No <code color="danger">*</code></CFormLabel>
-                        <CFormInput type="text" id="phone"   {...register("phone",{required:"Phone no is required"})} defaultValue={empdata?.phoneno} />
+                        <CFormLabel htmlFor="phone">Phone No(Personal) <code color="danger">*</code></CFormLabel>
+                        <CFormInput type="text" id="phone"   {...register("phone",{required:"Phone no is required"})}  />
                         {errors.phone && <code color="danger">{errors.phone?.message}</code>}
+                    </CCol>
+                    <CCol md={3}>
+                        <CFormLabel htmlFor="workphone">Work Phone No <code color="danger">*</code></CFormLabel>
+                        <CFormInput type="text" id="workphone" name="workphone"   {...register("workphone",{required:"Work Phone no is required"})} />
+                        {errors.workphone && <code color="danger">{errors.workphone?.message}</code>}
                     </CCol>
 
                     <CCol md={3}>
                         <CFormLabel htmlFor="email">Email </CFormLabel>
-                        <CFormInput type="text" id="email"   {...register("email", {required:"Email is required"})} defaultValue={empdata?.email} />
+                        <CFormInput type="text" id="email"   {...register("email")} defaultValue={empdata?.email} />
                         {errors.email && <code color="danger">{errors.email?.message}</code>}
                     </CCol>
                     <CCol md={3}>
                         <CFormLabel htmlFor="userphoto">Photo <code color="danger">*</code>
                         {
-                            empdata.employee_photo !='' ?(
+                            empdata?.employee_photo !='' ?(
                             <CTooltip content="Download" >
                                 <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empdata.employee_photo} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
                             </CTooltip>):null
@@ -240,6 +258,12 @@ return(
                         <CFormInput type="text" id="salary"  
                         {...register("salary",{required:"Salary is required"})} defaultValue={empdata?.salary} />
                         {errors.salary && <code color="danger">{errors.salary?.message}</code>}
+                    </CCol>
+                    <CCol md={3}>
+                        <CFormLabel htmlFor="datejoining">Date of Joining <code color="danger">*</code></CFormLabel>
+                        <CFormInput type="date" id="datejoining"  
+                        {...register("datejoining",{required:"Date Joining is required"})} defaultValue={empdata?.datejoining} />
+                        {errors.datejoining && <code color="danger">{errors.datejoining?.message}</code>}
                     </CCol>
                     
                     <CCol md={3}>

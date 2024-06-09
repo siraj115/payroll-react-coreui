@@ -13,6 +13,7 @@ import EmployeeBasicForm from "./EmployeeBasicForm"
 import EmployeeAdvanceForm from "./EmployeeAdvanceForm"
 import EmployeeAdvanceTable from "./EmployeeAdvanceTable"
 import EmployeeOverTimeForm from "./EmployeeOverTimeForm"
+import EmployeeProvidentFundForm from "./EmployeeProvidentFundForm"
 const EmployeeTabs = ()=>{
     return (
         <CCol xs={12}>
@@ -25,6 +26,7 @@ const EmployeeTabs = ()=>{
                             <CTab itemKey="basic">Basic Details</CTab>
                             <CTab itemKey="advance">Advance</CTab>
                             <CTab itemKey="overtime">Over Time</CTab>
+                            <CTab itemKey="pf">Provident Fund</CTab>
                         </CTabList>
                         <CTabContent>
                             <CTabPanel className="p-3" itemKey="basic">
@@ -37,6 +39,10 @@ const EmployeeTabs = ()=>{
                             <CTabPanel className="p-3" itemKey="overtime">
                                 <EmployeeOverTimeForm />
                                 <EmployeeAdvanceTable tblheading="OverTime List" />
+                            </CTabPanel>
+                            <CTabPanel className="p-3" itemKey="pf">
+                                <EmployeeProvidentFundForm />
+                                <EmployeeAdvanceTable tblheading="PF List" />
                             </CTabPanel>
                         </CTabContent>
                     </CTabs>

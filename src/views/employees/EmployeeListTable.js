@@ -69,17 +69,17 @@ const EmployeeListTable = ({tblheading, users})=>{
                                        const name       = (eachuser.name!=null)?capitalizeFirstLetter(eachuser.name):'';
                                        const country    = (eachuser.country!=null)?capitalizeFirstLetter(eachuser.country):''; 
                                        const employee_role    = (eachuser.employee_role!=null)?capitalizeFirstLetter(eachuser.employee_role):''; 
-
+                                        const employee_type = (eachuser.employee_type!=null)?capitalizeFirstLetter(eachuser.employee_type):''; 
                                         const sno       = startIndex + index +1;
 
                                         return(<CTableRow key={eachuser.id}>
                                             <CTableHeaderCell scope="row">{sno}</CTableHeaderCell>
                                             <CTableDataCell>{name}</CTableDataCell>
                                             <CTableDataCell>{eachuser.email}</CTableDataCell>
-                                            <CTableDataCell>{eachuser.id}</CTableDataCell>
+                                            <CTableDataCell>{eachuser.empno}</CTableDataCell>
                                             <CTableDataCell>{country}</CTableDataCell>
                                             <CTableDataCell>{employee_role}</CTableDataCell>
-                                            <CTableDataCell>{eachuser.employee_role}</CTableDataCell>
+                                            <CTableDataCell>{employee_type}</CTableDataCell>
                                             <CTableDataCell>
                                                 <CListGroup layout="horizontal">
                                                     <CTooltip content="Edit Employee">

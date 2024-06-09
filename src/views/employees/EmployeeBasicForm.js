@@ -51,11 +51,17 @@ const EmployeeBasicForm = ()=>{
         let response = await axios.get(url)
         console.log(response.data.data)
         const users = response.data.data;
-        setEmpbasicdata(users)
+        if(users!=null){
+            setEmpbasicdata(users)
+        }
         setValue("passport",users?.passport)
+        setValue("passport_expiry",users?.passport_expiry)
+        setValue("visano",users?.visano)
         setValue("visaexpiry",users?.visa_expiry)
-        setValue("eid",users?.eid_expiry)
+        setValue("eidno",users?.eidno)
+        setValue("eidexpiry",users?.eid_expiry)
         setValue("workpermit",users?.work_permit)
+        setValue("workpermitexpiry",users?.work_permit_expiry)
         setValue("personalno",users?.personal_no)
         setValue("personalaccno",users?.personal_acc_no)
         
@@ -75,15 +81,20 @@ const EmployeeBasicForm = ()=>{
                 className="row g-3 needs-validation"
                 onSubmit={handleSubmit(onSubmit)}
                 >
-                <CCol md={6}>
+                <CCol md={4}>
                     <CFormLabel htmlFor="passport">Passport <code color="danger">*</code></CFormLabel>
                     <CFormInput type="text" id="passport"   {...register("passport", {required:'Passport is required'})}  /> 
                     {errors.passport && <code color="danger">{errors.passport?.message}</code>}
                 </CCol>
-                <CCol md={6}>
-                    <CFormLabel htmlFor="passportupload">Passport Upload <code color="danger">*</code>
+                <CCol md={4}>
+                    <CFormLabel htmlFor="passport_expiry">Passport Expiry <code color="danger">*</code></CFormLabel>
+                    <CFormInput type="date" id="passport_expiry"   {...register("passport_expiry", {required:'Passport Expiry is required'})}  /> 
+                    {errors.passport_expiry && <code color="danger">{errors.passport_expiry?.message}</code>}
+                </CCol>
+                <CCol md={4}>
+                    <CFormLabel htmlFor="passportupload">Passport Upload 
                         {
-                            empbasicdata.passport_url !='' ?(
+                            (empbasicdata?.passport_url !=null && empbasicdata?.passport_url !='') ?(
                             <CTooltip content="Download" >
                                 <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata.passport_url} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
                             </CTooltip>):null
@@ -93,19 +104,26 @@ const EmployeeBasicForm = ()=>{
                     {errors.passportupload && <code color="danger">{errors.passportupload?.message}</code>}
                 </CCol>
                 
-                <CCol md={6}>
+                <CCol md={4}>
+                    <CFormLabel htmlFor="visano">Visa <code color="danger">*</code>
+                        
+                    </CFormLabel>
+                    <CFormInput type="text" id="visano" {...register("visano", {required:'Visa is required'})}  /> 
+                    {errors.visano && <code color="danger">{errors.visano?.message}</code>}
+                </CCol>
+                <CCol md={4}>
                     <CFormLabel htmlFor="visaexpiry">Visa Expiry <code color="danger">*</code>
                         
                     </CFormLabel>
-                    <CFormInput type="text" id="visaexpiry" {...register("visaexpiry", {required:'Visa exipry is required'})}  /> 
+                    <CFormInput type="date" id="visaexpiry" {...register("visaexpiry", {required:'Visa exipry is required'})}  /> 
                     {errors.visaexpiry && <code color="danger">{errors.visaexpiry?.message}</code>}
                 </CCol>
-                <CCol md={6}>
+                <CCol md={4}>
                     <CFormLabel htmlFor="visaupload">Visa Upload <code color="danger">*</code>
                      {
-                            empbasicdata.visa_expiry_upload !='' ?(
+                            (empbasicdata?.visa_expiry_upload != null && empbasicdata?.visa_expiry_upload != '') ?(
                             <CTooltip content="Download" >
-                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata.visa_expiry_upload} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
+                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata?.visa_expiry_upload} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
                             </CTooltip>):null
                         }
                     </CFormLabel>
@@ -113,15 +131,20 @@ const EmployeeBasicForm = ()=>{
                     {errors.visaupload && <code color="danger">{errors.visaupload?.message}</code>}
                 </CCol>
                 
-                <CCol md={6}>
-                    <CFormLabel htmlFor="eid">Eid <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="eid"    {...register("eid", {required:'Eid is required'})}  /> 
-                    {errors.eid && <code color="danger">{errors.eid?.message}</code>}
+                <CCol md={4}>
+                    <CFormLabel htmlFor="eidno">Emirates ID <code color="danger">*</code></CFormLabel>
+                    <CFormInput type="text" id="eidno"    {...register("eidno", {required:'Eid is required'})}  /> 
+                    {errors.eidno && <code color="danger">{errors.eidno?.message}</code>}
                 </CCol>
-                <CCol md={6}>
-                    <CFormLabel htmlFor="eidupload">Eid Upload <code color="danger">*</code>
+                <CCol md={4}>
+                    <CFormLabel htmlFor="eidexpiry">Emirates ID Expiry <code color="danger">*</code></CFormLabel>
+                    <CFormInput type="date" id="eidexpiry"    {...register("eidexpiry", {required:'Emirates Expiry is required'})}  /> 
+                    {errors.eidexpiry && <code color="danger">{errors.eidexpiry?.message}</code>}
+                </CCol>
+                <CCol md={4}>
+                    <CFormLabel htmlFor="eidupload">Emirates ID Upload <code color="danger">*</code>
                      {
-                            empbasicdata.eid_expiry_upload !='' ?(
+                            (empbasicdata?.eid_expiry_upload !=null && empbasicdata?.eid_expiry_upload !='') ?(
                             <CTooltip content="Download" >
                                 <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata.eid_expiry_upload} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
                             </CTooltip>):null
@@ -130,25 +153,20 @@ const EmployeeBasicForm = ()=>{
                     <CFormInput type="file" id="eidupload"  {...register("eidupload")}/>
                     {errors.eidupload && <code color="danger">{errors.eidupload?.message}</code>}
                 </CCol>
-                <CCol md={3}>
+                <CCol md={4}>
                     <CFormLabel htmlFor="workpermit">Work Permit <code color="danger">*</code></CFormLabel>
                     <CFormInput type="text" id="workpermit"    {...register("workpermit", {required:'Work Permit is required'})}  /> 
                     {errors.workpermit && <code color="danger">{errors.workpermit?.message}</code>}
                 </CCol>
-                <CCol md={3}>
-                    <CFormLabel htmlFor="personalno">Personal Number <code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="personalno"   {...register("personalno", {required:'Personal Number is required'})}  /> 
-                    {errors.personalno && <code color="danger">{errors.personalno?.message}</code>}
+                <CCol md={4}>
+                    <CFormLabel htmlFor="workpermitexpiry">Work Permit Expiry <code color="danger">*</code></CFormLabel>
+                    <CFormInput type="date" id="workpermitexpiry"    {...register("workpermitexpiry", {required:'Work Permit is required'})}  /> 
+                    {errors.workpermitexpiry && <code color="danger">{errors.workpermitexpiry?.message}</code>}
                 </CCol>
-                <CCol md={3}>
-                    <CFormLabel htmlFor="personalaccno">Personal Account Number<code color="danger">*</code></CFormLabel>
-                    <CFormInput type="text" id="personalaccno"   {...register("personalaccno", {required:'Personal Acc no is required'})}  /> 
-                    {errors.personalaccno && <code color="danger">{errors.personalaccno?.message}</code>}
-                </CCol>
-                <CCol md={3}>
+                <CCol md={4}>
                     <CFormLabel htmlFor="labourcardupload">Labour Card Upload <code color="danger">*</code>
                     {
-                            empbasicdata.labour_card_upload !='' ?(
+                            (empbasicdata?.labour_card_upload !=null && empbasicdata?.labour_card_upload !='') ?(
                             <CTooltip content="Download" >
                                 <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empbasicdata.labour_card_upload} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
                             </CTooltip>):null
@@ -157,6 +175,17 @@ const EmployeeBasicForm = ()=>{
                     <CFormInput type="file" id="labourcardupload" defaultValue=""  {...register("labourcardupload")}  />
                     {errors.labourcardupload && <code color="danger">{errors.labourcardupload?.message}</code>}
                 </CCol>
+                <CCol md={6}>
+                    <CFormLabel htmlFor="personalno">Personal Number <code color="danger">*</code></CFormLabel>
+                    <CFormInput type="text" id="personalno"   {...register("personalno", {required:'Personal Number is required'})}  /> 
+                    {errors.personalno && <code color="danger">{errors.personalno?.message}</code>}
+                </CCol>
+                <CCol md={6}>
+                    <CFormLabel htmlFor="personalaccno">Personal Account Number<code color="danger">*</code></CFormLabel>
+                    <CFormInput type="text" id="personalaccno"   {...register("personalaccno", {required:'Personal Acc no is required'})}  /> 
+                    {errors.personalaccno && <code color="danger">{errors.personalaccno?.message}</code>}
+                </CCol>
+                
                 <CCol xs={12}>
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                         <CButton color="primary" className="me-md-2" type="submit">

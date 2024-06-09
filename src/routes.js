@@ -57,6 +57,10 @@ const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 const AddEmployee   = React.lazy(() => import('./views/employees/AddEmployee'))
 const ListEmployee  = React.lazy(() => import('./views/employees/ListEmployee'))
 
+// Employees
+const AddClient   = React.lazy(() => import('./views/client/AddClient'))
+const ListClient  = React.lazy(() => import('./views/employees/ListEmployee'))
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
@@ -105,6 +109,8 @@ const routes = [
   { path: '/employee/addemployee', name: 'Add Employee', element: AddEmployee },
   { path: '/employee/addemployee/:empid', name: 'Edit Employee', element: AddEmployee },
   { path: '/employee/listemployee', name: 'Employee List', element: ListEmployee },
+  { path: '/client/addclient', name: 'Add Client', element: AddClient },
+  { path: '/client/listclient', name: 'List Client', element: ListClient },
 ]
 
 export default routes
