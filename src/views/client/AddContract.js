@@ -1,4 +1,5 @@
-import React,{useState} from "react";
+import React,{useState,useEffect, useRef } from "react";
+import {useParams} from 'react-router-dom'
 import {
     CButton,
     CCard,
@@ -13,31 +14,85 @@ import {
     CFormSelect,
     CFormTextarea,
     CToaster,
-    CTooltip
+    CTooltip,
   } from '@coreui/react'
+  import CIcon from '@coreui/icons-react'
+  import {
+    cilCloudDownload
+  } from '@coreui/icons'
 import {useForm} from "react-hook-form";
 import axios from 'axios';
 import UserToaster from '../../utils/UserToaster';
+import { calculateDaysRemaining } from "../../utils/utils";
 const AddContract = ()=>{
+    const [toast, addToast] = useState(0);
+    const toaster = useRef()
+    const {clientid} = useParams();
     const [btnname, setBtnname] = useState('Save')
+    const [clientCotractData, setClientCotractData] = useState({});
     const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
+    console.log(errors)
+    const startDate = watch("contractstart");
+    const endDate = watch("contractend");
     const onSubmit = async (data) =>{
         try{
-            console.log(data);//return false;
+            console.log('fgfg',data);//return false;
+            const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/saveclientcontract`
+            //console.log(url)    
+            data.clientid = clientid;
+     
+            let response = await axios.post(url,data,headers)
+            if(response?.data?.errortype ===1){
+                const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
+                addToast(user_toast)
+                
+            }else if(response?.data?.errortype ===2){
+                const user_toast = <UserToaster color='danger' msg={response?.data?.msg} />
+                addToast(user_toast)
+            }
         }catch(err){
 
         }
     }
+    const ClientContractData = async (clientid) =>{
+        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/getclientcontract/${clientid}`
+       // console.log(url)    
+        let response = await axios.get(url)
+        console.log(response.data.data)
+        const users = response.data.data;
+        if(users!=null){
+            setClientCotractData(users)
+        }
+        setValue("contractstart",users?.contractstart)
+        setValue("contractend",users?.contractend)
+        setValue("contractprice",users?.contractprice)
+        setValue("countmale",users?.countmale)
+        setValue("countfemale",users?.countfemale)
+        setValue("countsupervisor",users?.countsupervisor)
+        setValue("amountmale",users?.amountmale)
+        setValue("amountfemale",users?.amountfemale)
+        setValue("amountsupervisor",users?.amountsupervisor)
+        setValue("vattax",users?.vattax)
+        
+    }
+    useEffect(()=>{
+        if(clientid!=null){
+            console.log(clientid)
+            //setBtnname('Update')
+            ClientContractData(clientid)
+            
+        }
+    },[setValue])
     return(
         
     <CCol xs={12}>
         <CCard className="mb-4">
             <CCardHeader>
                 <strong>Client Contract Details</strong> <small></small>
-               
+                <CToaster className="p-3" placement="top-end" push={toast} ref={toaster} />
             </CCardHeader>
             <CCardBody>
                 <CForm
@@ -55,7 +110,10 @@ const AddContract = ()=>{
                     </CCol>
                     <CCol md={4}>
                         <CFormLabel htmlFor="contractend">Contract End <code color="danger">*</code></CFormLabel>
-                        <CFormInput type="date" {...register("contractend",{required:"Contract End Date is required"})}   /> 
+                        <CFormInput type="date" {...register("contractend",{
+                            required:"Contract End Date is required",
+                            validate: value => !startDate || new Date(endDate) >= new Date(startDate) || "End date must be after start date"
+                            })}   /> 
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                         {errors.contractend && <code color="danger">{errors.contractend?.message}</code>}
                     </CCol>
@@ -102,7 +160,12 @@ const AddContract = ()=>{
                     </CCol>
                     <CCol md={4}>
                         <CFormLabel htmlFor="contractpdf">Contract PDF <code color="danger">*</code>
-                    
+                        {
+                            (clientCotractData?.contractpdf !=null && clientCotractData?.contractpdf !='') ?(
+                            <CTooltip content="Download" >
+                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={clientCotractData.contractpdf} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
+                            </CTooltip>):null
+                        }
                         </CFormLabel>
                         <CFormInput type="file" id="contractpdf"   {...register("contractpdf")} />
                         {

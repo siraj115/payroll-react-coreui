@@ -1,4 +1,5 @@
-import React,{useState} from "react";
+import React,{useState,useRef,useEffect } from "react";
+import {Link, useNavigate, useParams} from 'react-router-dom'
 import {
     CButton,
     CCard,
@@ -21,24 +22,66 @@ import UserToaster from '../../utils/UserToaster';
 const ClientDetailForm = ()=>{
     const [btnname, setBtnname] = useState('Save')
     const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
-
+    const {clientid} = useParams();
+    const [toast, addToast] = useState(0);
+    const toaster = useRef()
+    const [clientdata, setClientdata] = useState({});
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
     const onSubmit = async (data) =>{
         try{
-            console.log(data);//return false;
+            console.log('data',data);//return false;
+            const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/saveclient`
+            console.log(url)    
+            if(clientid!=null)
+                data.id = clientid;
+
+            let response = await axios.post(url,data)
+            if(response?.data?.errortype ===1){
+                const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
+                addToast(user_toast)
+                setTimeout(
+                    ()=>{
+                        window.location.href=`#/client/addclient/${response?.data?.clientid}`
+                    },1000)
+                //setTimeout(function(){navigate(`/client/addclient/${response?.data?.clientid}`)},1000)
+            }
         }catch(err){
 
         }
     }
+    const ClientData = async (clientid) =>{
+        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/getclient/${clientid}`
+       // console.log(url)    
+        let response = await axios.get(url)
+        console.log(response.data.data)
+        const users = response.data.data;
+        setClientdata((response.data.data))
+        setValue("companyname",users.companyname)
+        setValue("contactname",users.contactname)
+        setValue("contactphone",users.contactphone)
+        setValue("contactemail",users.contactemail)
+        setValue("address",users.address)
+        setValue("companytrn",users.companytrn)
+        
+    }
+   
+    useEffect(()=>{
+        if(clientid!=null){
+            console.log(clientid)
+            setBtnname('Update')
+            ClientData(clientid)
+            
+        }
+    },[setValue])
     return(
         
     <CCol xs={12}>
         <CCard className="mb-4">
             <CCardHeader>
                 <strong>Client Details</strong> <small></small>
-               
+                <CToaster className="p-3" placement="top-end" push={toast} ref={toaster} />
             </CCardHeader>
             <CCardBody>
                 <CForm

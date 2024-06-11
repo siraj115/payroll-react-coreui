@@ -54,7 +54,10 @@ const EmployeeDetailForm = ()=>{
                 const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
                 addToast(user_toast)
                 
-                setTimeout(function(){navigate(`/employee/addemployee/${response?.data?.userid}`)},1000)
+                setTimeout(
+                    ()=>{
+                        window.location.href=`#/employee/addemployee/${response?.data?.userid}`
+                    },1000)
             }else if(response?.data?.errortype ===2){
                 const user_toast = <UserToaster color='danger' msg={response?.data?.msg} />
                 addToast(user_toast)

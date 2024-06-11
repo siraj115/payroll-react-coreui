@@ -59,7 +59,7 @@ const ListEmployee  = React.lazy(() => import('./views/employees/ListEmployee'))
 
 // Employees
 const AddClient   = React.lazy(() => import('./views/client/AddClient'))
-const ListClient  = React.lazy(() => import('./views/employees/ListEmployee'))
+const ListClient  = React.lazy(() => import('./views/client/ListClient'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -110,6 +110,7 @@ const routes = [
   { path: '/employee/addemployee/:empid', name: 'Edit Employee', element: AddEmployee },
   { path: '/employee/listemployee', name: 'Employee List', element: ListEmployee },
   { path: '/client/addclient', name: 'Add Client', element: AddClient },
+  { path: '/client/addclient/:clientid', name: 'Edit Client', element: AddClient },
   { path: '/client/listclient', name: 'List Client', element: ListClient },
 ]
 
