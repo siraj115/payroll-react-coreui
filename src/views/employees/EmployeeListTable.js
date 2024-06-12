@@ -65,7 +65,7 @@ const EmployeeListTable = ({tblheading, users})=>{
                                     
                                     count && allusers.map((eachuser, index)=>{
                                         
-                                       const editurl    = `#/employee/addemployee/${eachuser.id}`
+                                       const editurl    = `${window.location.origin}/employee/addemployee/${eachuser.id}`
                                        const name       = (eachuser.name!=null)?capitalizeFirstLetter(eachuser.name):'';
                                        const country    = (eachuser.country!=null)?capitalizeFirstLetter(eachuser.country):''; 
                                        const employee_role    = (eachuser.employee_role!=null)?capitalizeFirstLetter(eachuser.employee_role):''; 

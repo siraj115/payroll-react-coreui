@@ -1,4 +1,5 @@
 import React, {useState,useEffect, useRef} from "react";
+import Cookies from 'js-cookie';
 import {
     CButton,
     CCol,
@@ -26,13 +27,18 @@ const EmployeeBasicForm = ()=>{
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
+    
+    const login_userid = Cookies.get('loggedinuserid');
+    const token = Cookies.get('accessToken');
     const onSubmit = async (data) =>{
        console.log(data);
        //return false;
        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/savebasicdetails`
        //console.log(url)    
        data.userid = empid;
-
+       data.login_userid = login_userid;
+       
+       headers.headers['Authorization']= token;
        let response = await axios.post(url,data,headers)
        console.log(response.data)
        if(response?.data?.errortype ===1){
@@ -48,7 +54,10 @@ const EmployeeBasicForm = ()=>{
     const UserBasicData = async (empid) =>{
         const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/getuserbasic/${empid}`
        // console.log(url)    
-        let response = await axios.get(url)
+       const headers = {
+            headers: {'Authorization':token}
+        }
+        let response = await axios.get(url,headers)
         console.log(response.data.data)
         const users = response.data.data;
         if(users!=null){

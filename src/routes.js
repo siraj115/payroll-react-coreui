@@ -53,17 +53,21 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
+// Logout
+const LogOut   = React.lazy(() => import('./views/logout/LogOut'))
+
 // Employees
 const AddEmployee   = React.lazy(() => import('./views/employees/AddEmployee'))
 const ListEmployee  = React.lazy(() => import('./views/employees/ListEmployee'))
 
-// Employees
+// Clients
 const AddClient   = React.lazy(() => import('./views/client/AddClient'))
 const ListClient  = React.lazy(() => import('./views/client/ListClient'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/logout', name: 'Logout', element: LogOut },
  /* { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },

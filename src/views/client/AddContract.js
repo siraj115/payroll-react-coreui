@@ -1,5 +1,6 @@
 import React,{useState,useEffect, useRef } from "react";
 import {useParams} from 'react-router-dom'
+import Cookies from 'js-cookie';
 import {
     CButton,
     CCard,
@@ -23,7 +24,7 @@ import {
 import {useForm} from "react-hook-form";
 import axios from 'axios';
 import UserToaster from '../../utils/UserToaster';
-import { calculateDaysRemaining } from "../../utils/utils";
+
 const AddContract = ()=>{
     const [toast, addToast] = useState(0);
     const toaster = useRef()
@@ -34,6 +35,8 @@ const AddContract = ()=>{
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
+    const login_userid  = Cookies.get('loggedinuserid');
+    const token         = Cookies.get('accessToken');
     console.log(errors)
     const startDate = watch("contractstart");
     const endDate = watch("contractend");
@@ -43,7 +46,8 @@ const AddContract = ()=>{
             const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/saveclientcontract`
             //console.log(url)    
             data.clientid = clientid;
-     
+            data.login_userid = login_userid;
+            headers.headers.Authorization = token;
             let response = await axios.post(url,data,headers)
             if(response?.data?.errortype ===1){
                 const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
@@ -60,7 +64,10 @@ const AddContract = ()=>{
     const ClientContractData = async (clientid) =>{
         const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/getclientcontract/${clientid}`
        // console.log(url)    
-        let response = await axios.get(url)
+       const headers = {
+            headers: {'Authorization':token}
+        }
+        let response = await axios.get(url,headers)
         console.log(response.data.data)
         const users = response.data.data;
         if(users!=null){
@@ -139,17 +146,17 @@ const AddContract = ()=>{
                         {errors.countsupervisor && <code color="danger">{errors.countsupervisor?.message}</code>}
                     </CCol>
                     <CCol md={4}>
-                        <CFormLabel htmlFor="amountmale">Employee salary Per Male <code color="danger">*</code></CFormLabel>
+                        <CFormLabel htmlFor="amountmale">Employee Contract Amount Male <code color="danger">*</code></CFormLabel>
                         <CFormInput type="number" id="amountmale"  {...register("amountmale", {required:"Male Salary is required"})} />
                         {errors.amountmale && <code color="danger">{errors.amountmale?.message}</code>}
                     </CCol>
                     <CCol md={4}>
-                        <CFormLabel htmlFor="amountfemale">Employee Salary Per Female <code color="danger">*</code></CFormLabel>
+                        <CFormLabel htmlFor="amountfemale">Employee Contract Amount Female <code color="danger">*</code></CFormLabel>
                         <CFormInput type="number" id="amountfemale"  {...register("amountfemale", {required:"Female Salary is required"})} />
                         {errors.amountfemale && <code color="danger">{errors.amountfemale?.message}</code>}
                     </CCol>
                     <CCol md={4}>
-                        <CFormLabel htmlFor="amountsupervisor">Supervisor Salary  <code color="danger">*</code></CFormLabel>
+                        <CFormLabel htmlFor="amountsupervisor">Employee Contract Amount Supervisor  <code color="danger">*</code></CFormLabel>
                         <CFormInput type="number" id="amountsupervisor"  {...register("amountsupervisor", {required:"Supervisor Salary is required"})} />
                         {errors.amountsupervisor && <code color="danger">{errors.amountsupervisor?.message}</code>}
                     </CCol>

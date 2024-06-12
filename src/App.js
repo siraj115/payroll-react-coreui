@@ -1,7 +1,9 @@
 
 import React, { Suspense, useEffect } from 'react'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter,  Route, Routes } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import Cookies from 'js-cookie';
+
 
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
@@ -20,21 +22,37 @@ const App = () => {
   const storedTheme = useSelector((state) => state.theme)
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.href.split('?')[1])
-    const theme = urlParams.get('theme') && urlParams.get('theme').match(/^[A-Za-z0-9\s]+/)[0]
-    if (theme) {
-      setColorMode(theme)
-    }
+    const token = checkCookie();
+    //console.log(token)
+    if(token){
 
-    if (isColorModeSet()) {
-      return
-    }
+    
+      const urlParams = new URLSearchParams(window.location.href.split('?')[1])
+      const theme = urlParams.get('theme') && urlParams.get('theme').match(/^[A-Za-z0-9\s]+/)[0]
+      if (theme) {
+        setColorMode(theme)
+      }
 
-    setColorMode(storedTheme)
+      if (isColorModeSet()) {
+        return
+      }
+
+      setColorMode(storedTheme)
+    }else{
+      if(window.location.pathname != '/login'){
+        setTimeout(
+          ()=>{
+              window.location.href=`${window.location.origin}/login`
+          },300)
+      }
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
+  const checkCookie=()=>{
+    const token = Cookies.get('accessToken');
+    return token;
+  }
   return (
-    <HashRouter>
+    <BrowserRouter>
       <Suspense
         fallback={
           <div className="pt-3 text-center">
@@ -50,7 +68,7 @@ const App = () => {
           <Route path="*" name="Home" element={<DefaultLayout />} />
         </Routes>
       </Suspense>
-    </HashRouter>
+    </BrowserRouter>
   )
 }
 

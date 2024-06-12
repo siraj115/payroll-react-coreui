@@ -63,7 +63,7 @@ const ClientListTable = ({tblheading, users})=>{
                                     
                                     count && allusers.map((eachuser, index)=>{
                                         
-                                       const editurl    = `#/client/addclient/${eachuser.id}`
+                                       const editurl    = `${window.location.origin}/client/addclient/${eachuser.id}`
                                        const companyname       = (eachuser.companyname!=null)?capitalizeFirstLetter(eachuser.companyname):'';
                                        const contactname       = (eachuser.contactname!=null)?capitalizeFirstLetter(eachuser.contactname):'';
                                        

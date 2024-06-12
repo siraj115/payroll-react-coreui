@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import {Link, useNavigate, useParams} from 'react-router-dom'
+import Cookies from 'js-cookie';
 import {
   CButton,
   CCard,
@@ -35,10 +36,14 @@ const EmployeeDetailForm = ()=>{
     const toaster = useRef()
     const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
     const {empid} = useParams();
+    const login_userid = Cookies.get('loggedinuserid');
+    const token = Cookies.get('accessToken');
+   
     //console.log(errors)
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
+    
     const onSubmit = async (data) =>{
         try{
             console.log(data);//return false;
@@ -47,6 +52,9 @@ const EmployeeDetailForm = ()=>{
             if(empid!=null)
                 data.id = empid;
 
+            data.login_userid = login_userid;
+           
+            headers.headers['Authorization']= token;
             let response = await axios.post(url,data,headers)
             //console.log(response)
            // console.log(response.data)
@@ -56,7 +64,8 @@ const EmployeeDetailForm = ()=>{
                 
                 setTimeout(
                     ()=>{
-                        window.location.href=`#/employee/addemployee/${response?.data?.userid}`
+                        //window.location.href=`#/employee/addemployee/${response?.data?.userid}`
+                        window.location.href=`${window.location.origin}/employee/addemployee/${response?.data?.userid}`
                     },1000)
             }else if(response?.data?.errortype ===2){
                 const user_toast = <UserToaster color='danger' msg={response?.data?.msg} />
@@ -77,7 +86,10 @@ const EmployeeDetailForm = ()=>{
     const UserData = async (empid) =>{
         const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/getuser/${empid}`
        // console.log(url)    
-        let response = await axios.get(url)
+       const headers = {
+            headers: {'Authorization':token}
+        }
+        let response = await axios.get(url,headers)
         console.log(response.data.data)
         const users = response.data.data;
         setEmpdata((response.data.data))

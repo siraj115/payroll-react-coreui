@@ -1,5 +1,6 @@
 import React,{useState,useRef,useEffect } from "react";
 import {Link, useNavigate, useParams} from 'react-router-dom'
+import Cookies from 'js-cookie';
 import {
     CButton,
     CCard,
@@ -29,6 +30,8 @@ const ClientDetailForm = ()=>{
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
+    const login_userid = Cookies.get('loggedinuserid');
+    const token = Cookies.get('accessToken');
     const onSubmit = async (data) =>{
         try{
             console.log('data',data);//return false;
@@ -37,13 +40,19 @@ const ClientDetailForm = ()=>{
             if(clientid!=null)
                 data.id = clientid;
 
-            let response = await axios.post(url,data)
+            data.login_userid = login_userid;
+            
+            const headers = {
+                headers: {'Authorization':token}
+            }
+            console.log('ins')
+            let response = await axios.post(url,data, headers)
             if(response?.data?.errortype ===1){
                 const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
                 addToast(user_toast)
                 setTimeout(
                     ()=>{
-                        window.location.href=`#/client/addclient/${response?.data?.clientid}`
+                        window.location.href=`${window.location.origin}/client/addclient/${response?.data?.clientid}`
                     },1000)
                 //setTimeout(function(){navigate(`/client/addclient/${response?.data?.clientid}`)},1000)
             }
@@ -54,12 +63,15 @@ const ClientDetailForm = ()=>{
     const ClientData = async (clientid) =>{
         const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/getclient/${clientid}`
        // console.log(url)    
-        let response = await axios.get(url)
+       const headers = {
+            headers: {'Authorization':token}
+        }
+        let response = await axios.get(url,headers)
         console.log(response.data.data)
         const users = response.data.data;
         setClientdata((response.data.data))
         setValue("companyname",users.companyname)
-        setValue("contactname",users.contactname)
+        //setValue("contactname",users.contactname)
         setValue("contactphone",users.contactphone)
         setValue("contactemail",users.contactemail)
         setValue("address",users.address)
@@ -96,11 +108,11 @@ const ClientDetailForm = ()=>{
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                         {errors.companyname && <code color="danger">{errors.companyname?.message}</code>}
                     </CCol>
-                    <CCol md={3}>
+                    {/*<CCol md={3}>
                         <CFormLabel htmlFor="contactname">Contact Person Name <code color="danger">*</code></CFormLabel>
                         <CFormInput type="text"  {...register("contactname", {required:'Contact Person is required'})} /> 
                         {errors.contactname && <code color="danger">{errors.contactname?.message}</code>}
-                    </CCol>
+                    </CCol>*/}
                     <CCol md={3}>
                         <CFormLabel htmlFor="contactphone">Contact Phone No <code color="danger">*</code></CFormLabel>
                         <CFormInput type="text" id="contactphone"  {...register("contactphone", {required:"Contact Phone is required"})} />
