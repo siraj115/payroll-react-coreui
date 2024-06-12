@@ -51,7 +51,6 @@ const ClientListTable = ({tblheading, users})=>{
                             <CTableHead>
                             <CTableRow>
                                 <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
-                                <CTableHeaderCell scope="col">Company Name</CTableHeaderCell>
                                 <CTableHeaderCell scope="col">Contact Person</CTableHeaderCell>
                                 <CTableHeaderCell scope="col">Phone No</CTableHeaderCell>
                                 <CTableHeaderCell scope="col">TRN</CTableHeaderCell>
@@ -65,14 +64,12 @@ const ClientListTable = ({tblheading, users})=>{
                                         
                                        const editurl    = `${window.location.origin}/client/addclient/${eachuser.id}`
                                        const companyname       = (eachuser.companyname!=null)?capitalizeFirstLetter(eachuser.companyname):'';
-                                       const contactname       = (eachuser.contactname!=null)?capitalizeFirstLetter(eachuser.contactname):'';
                                        
                                         const sno       = startIndex + index +1;
 
                                         return(<CTableRow key={eachuser.id}>
                                             <CTableHeaderCell scope="row">{sno}</CTableHeaderCell>
                                             <CTableDataCell>{companyname}</CTableDataCell>
-                                            <CTableDataCell>{contactname}</CTableDataCell>
                                             <CTableDataCell>{eachuser.contactphone}</CTableDataCell>
                                             <CTableDataCell>{eachuser.companytrn}</CTableDataCell>
                                             <CTableDataCell>
