@@ -53,14 +53,22 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
+// Logout
+const LogOut   = React.lazy(() => import('./views/logout/LogOut'))
+
 // Employees
 const AddEmployee   = React.lazy(() => import('./views/employees/AddEmployee'))
 const ListEmployee  = React.lazy(() => import('./views/employees/ListEmployee'))
 
+// Clients
+const AddClient   = React.lazy(() => import('./views/client/AddClient'))
+const ListClient  = React.lazy(() => import('./views/client/ListClient'))
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/theme', name: 'Theme', element: Colors, exact: true },
+  { path: '/logout', name: 'Logout', element: LogOut },
+ /* { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
   { path: '/base', name: 'Base', element: Cards, exact: true },
@@ -101,11 +109,13 @@ const routes = [
   { path: '/notifications/badges', name: 'Badges', element: Badges },
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
-  { path: '/widgets', name: 'Widgets', element: Widgets },
-  { path: '/employee/addemployee', name: 'Employee', element: AddEmployee },
-  { path: '/employee/addemployee/', name: 'Employee', element: AddEmployee },
-  { path: '/employee/addemployee/:empid', name: 'Employee', element: AddEmployee },
-  { path: '/employee/listemployee', name: 'Employee', element: ListEmployee },
+  { path: '/widgets', name: 'Widgets', element: Widgets },*/
+  { path: '/employee/addemployee', name: 'Add Employee', element: AddEmployee },
+  { path: '/employee/addemployee/:empid', name: 'Edit Employee', element: AddEmployee },
+  { path: '/employee/listemployee', name: 'Employee List', element: ListEmployee },
+  { path: '/client/addclient', name: 'Add Client', element: AddClient },
+  { path: '/client/addclient/:clientid', name: 'Edit Client', element: AddClient },
+  { path: '/client/listclient', name: 'List Client', element: ListClient },
 ]
 
 export default routes

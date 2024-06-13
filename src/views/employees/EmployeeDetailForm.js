@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import {Link, useNavigate, useParams} from 'react-router-dom'
+import Cookies from 'js-cookie';
 import {
   CButton,
   CCard,
@@ -13,13 +14,15 @@ import {
   CFormLabel,
   CFormSelect,
   CFormTextarea,
-  CToast,
-  CToastHeader,
-  CToastBody,
   CToaster,
-  CAlert
+  CTooltip
 } from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import {
+    cilCloudDownload
+  } from '@coreui/icons'
 import {employeeRoles} from "../../utils/emp_utils";
+import {countrycodes} from "../../utils/contryCodes"
 import {useForm} from "react-hook-form";
 import axios from 'axios';
 import UserToaster from '../../utils/UserToaster';
@@ -29,13 +32,18 @@ const EmployeeDetailForm = ()=>{
     const [toast, addToast] = useState(0);
     const [empdata, setEmpdata] = useState({});
     const [btnname, setBtnname] = useState('Save')
+    const [countryCode, setcountryCode] = useState('')
     const toaster = useRef()
-    const {register, handleSubmit, watch, formState:{errors}} = useForm()
+    const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
     const {empid} = useParams();
-    console.log(errors)
+    const login_userid = Cookies.get('loggedinuserid');
+    const token = Cookies.get('accessToken');
+   
+    //console.log(errors)
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
+    
     const onSubmit = async (data) =>{
         try{
             console.log(data);//return false;
@@ -44,6 +52,9 @@ const EmployeeDetailForm = ()=>{
             if(empid!=null)
                 data.id = empid;
 
+            data.login_userid = login_userid;
+           
+            headers.headers['Authorization']= token;
             let response = await axios.post(url,data,headers)
             //console.log(response)
            // console.log(response.data)
@@ -51,7 +62,11 @@ const EmployeeDetailForm = ()=>{
                 const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
                 addToast(user_toast)
                 
-                setTimeout(function(){navigate(`/employee/addemployee/${response?.data?.userid}`)},1000)
+                setTimeout(
+                    ()=>{
+                        //window.location.href=`#/employee/addemployee/${response?.data?.userid}`
+                        window.location.href=`${window.location.origin}/employee/addemployee/${response?.data?.userid}`
+                    },1000)
             }else if(response?.data?.errortype ===2){
                 const user_toast = <UserToaster color='danger' msg={response?.data?.msg} />
                 addToast(user_toast)
@@ -71,9 +86,26 @@ const EmployeeDetailForm = ()=>{
     const UserData = async (empid) =>{
         const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/getuser/${empid}`
        // console.log(url)    
-        let response = await axios.get(url)
-        //console.log(response.data.data)
+       const headers = {
+            headers: {'Authorization':token}
+        }
+        let response = await axios.get(url,headers)
+        console.log(response.data.data)
+        const users = response.data.data;
         setEmpdata((response.data.data))
+        setValue("empno",users.empno)
+        setValue("name",users.name)
+        setValue("dob",users.dob)
+        setValue("gender",users.gender)
+        setValue("address",users.address)
+        setValue("country",users.country)
+        setValue("phone",users.phoneno)
+        setValue("workphone",users.workphone)
+        setValue("email",users.email)
+        setValue("emp_type",users.employee_type)
+        setValue("emp_role",users.employee_role)
+        setValue("salary",users.salary)
+        setValue("canlogin",(users.canlogin)?true:false)
         
     }
    
@@ -84,10 +116,17 @@ const EmployeeDetailForm = ()=>{
             UserData(empid)
             
         }
-    },[])
+    },[setValue])
     
    // console.log(empdata)
-    
+    const handleSelectCountry = (e)=>{
+        console.log(e.target.value)
+        const countryname = e.target.value;
+        const country = countrycodes.find(c=>c.name.toLocaleLowerCase() === countryname.toLocaleLowerCase())
+        console.log(country)
+       // setcountryCode(country.dial_code)
+        //setValue("country",countryCode)
+    }
 return(
     <CCol xs={12}>
         <CCard className="mb-4">
@@ -103,8 +142,9 @@ return(
                     >
                     <CCol md={3}>
                         <CFormLabel htmlFor="empno">Emp No</CFormLabel>
-                        <CFormInput type="number" {...register("empno")} defaultValue={empdata?.empno}  /> 
+                        <CFormInput type="number" {...register("empno", {required:"Emp No is required"})} defaultValue={empdata?.empno}  /> 
                         <CFormFeedback valid>Looks good!</CFormFeedback>
+                        {errors.empno && <code color="danger">{errors.empno?.message}</code>}
                     </CCol>
                     <CCol md={3}>
                         <CFormLabel htmlFor="name">Name <code color="danger">*</code></CFormLabel>
@@ -128,7 +168,7 @@ return(
                             label="Male"
                             value="male"
                             {...register("gender",{required:"Gender is required"})} 
-                            defaultChecked={(empdata?.gender && empdata.gender=='male')?true:false}
+                            
                         />
                         <CFormCheck
                             inline
@@ -138,39 +178,58 @@ return(
                             label="Female"
                             value="female"
                             {...register("gender",{required:"Gender is required"})} 
-                            defaultChecked={(empdata?.gender && empdata.gender=='female')?true:false}
+                           
                         />
                         </div>
                         {errors.gender && <code color="danger">{errors.gender?.message}</code>}
                     </CCol>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="validationCustom03">Address <code color="danger">*</code></CFormLabel>
+                        <CFormLabel htmlFor="address">Address <code color="danger">*</code></CFormLabel>
                         <CFormTextarea  id="address"   {...register("address",{required:"Address is required"})} defaultValue={empdata?.address}/>
                         {errors.address && <code color="danger">{errors.address?.message}</code>}
                     </CCol>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="validationCustom03">Country <code color="danger">*</code></CFormLabel>
-                        <CFormInput type="text" id="country"   {...register("country",{required:"Country is required"})} defaultValue={empdata?.country} />
+                        <CFormLabel htmlFor="country">Country <code color="danger">*</code></CFormLabel>
+                        
+                       <CFormSelect id="country" name="country" onChange={()=>{handleSelectCountry(event)}} {...register("country",{required:"Country is required"})}>
+                            <option value="">Select Country</option>
+                            {countrycodes.map((country)=>{
+                               return (<option value={country.name} key={country.code}>{country.name}</option>)
+                            })}
+                       </CFormSelect>
                         {errors.country && <code color="danger">{errors.country?.message}</code>}
                     </CCol>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="phone">Phone No <code color="danger">*</code></CFormLabel>
-                        <CFormInput type="text" id="phone"   {...register("phone",{required:"Phone no is required"})} defaultValue={empdata?.phoneno} />
+                        <CFormLabel htmlFor="phone">Phone No(Personal) <code color="danger">*</code></CFormLabel>
+                        <CFormInput type="text" id="phone"   {...register("phone",{required:"Phone no is required"})}  />
                         {errors.phone && <code color="danger">{errors.phone?.message}</code>}
+                    </CCol>
+                    <CCol md={3}>
+                        <CFormLabel htmlFor="workphone">Work Phone No <code color="danger">*</code></CFormLabel>
+                        <CFormInput type="text" id="workphone" name="workphone"   {...register("workphone",{required:"Work Phone no is required"})} />
+                        {errors.workphone && <code color="danger">{errors.workphone?.message}</code>}
                     </CCol>
 
                     <CCol md={3}>
                         <CFormLabel htmlFor="email">Email </CFormLabel>
-                        <CFormInput type="text" id="email"   {...register("email", {required:"Email is required"})} defaultValue={empdata?.email} />
+                        <CFormInput type="text" id="email"   {...register("email")} defaultValue={empdata?.email} />
                         {errors.email && <code color="danger">{errors.email?.message}</code>}
                     </CCol>
                     <CCol md={3}>
-                        <CFormLabel htmlFor="userphoto">Photo <code color="danger">*</code></CFormLabel>
+                        <CFormLabel htmlFor="userphoto">Photo <code color="danger">*</code>
+                        {
+                            empdata?.employee_photo !='' ?(
+                            <CTooltip content="Download" >
+                                <CButton color="info" shape="rounded-pill" size="sm" as="a" href={empdata.employee_photo} target="_blank"><CIcon icon={cilCloudDownload} className="nav-icon" size="sm"/></CButton>
+                            </CTooltip>):null
+                        }
+                        </CFormLabel>
                         <CFormInput type="file" id="userphoto"   {...register("userphoto")} />
                         {
                             //,{required:"Photo is required"}
                         }
                         {errors.userphoto && <code color="danger">{errors.userphoto?.message}</code>}
+                        
                     </CCol>
                     <CCol md={3}>
                         <CFormLabel htmlFor="emp_type">Employee Type <code color="danger">*</code></CFormLabel>
@@ -183,7 +242,7 @@ return(
                             label="Own"
                             value="own"
                             {...register("emp_type",{required:"Employee type is required"})} 
-                            defaultChecked={(empdata?.employee_type && empdata.employee_type=='own')?true:false}
+                            
                         />
                         <CFormCheck
                             inline
@@ -193,7 +252,7 @@ return(
                             label="Out Source"
                             value="outsource"
                             {...register("emp_type",{required:"Employee type is required"})} 
-                            defaultChecked={(empdata?.employee_type && empdata.employee_type=='outsource')?true:false}
+                            
                         />
                         </div>
                         {errors.emp_type && <code color="danger">{errors.emp_type?.message}</code>}
@@ -204,7 +263,7 @@ return(
                         <CFormSelect id="emp_role" 
                         options={employeeRoles}
                         {...register("emp_role", {required:"Employee role is required"})}
-                        value={empdata?.employee_role}
+                        
                         />
                         {errors.emp_role && <code color="danger">{errors.emp_role?.message}</code>}
                     </CCol>
@@ -215,10 +274,16 @@ return(
                         {...register("salary",{required:"Salary is required"})} defaultValue={empdata?.salary} />
                         {errors.salary && <code color="danger">{errors.salary?.message}</code>}
                     </CCol>
+                    <CCol md={3}>
+                        <CFormLabel htmlFor="datejoining">Date of Joining <code color="danger">*</code></CFormLabel>
+                        <CFormInput type="date" id="datejoining"  
+                        {...register("datejoining",{required:"Date Joining is required"})} defaultValue={empdata?.datejoining} />
+                        {errors.datejoining && <code color="danger">{errors.datejoining?.message}</code>}
+                    </CCol>
                     
                     <CCol md={3}>
                         <CFormLabel htmlFor="canlogin">Provide Login </CFormLabel>
-                        <CFormCheck id="canlogin"  {...register("canlogin")} value="1" defaultChecked={(empdata?.canlogin && empdata.canlogin==1)?true:false}/>
+                        <CFormCheck id="canlogin"  {...register("canlogin")} value="1" />
                        
                        
                         {errors.canlogin && <code color="danger">{errors.canlogin?.message}</code>}

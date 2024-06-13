@@ -42,7 +42,76 @@ const _nav = [
         to:'/employee/listemployee'
       }
     ]
-  },
+  },{
+    component: CNavGroup,
+    name: 'Client',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon"  />,
+    items:[
+      {
+        component:CNavItem,
+        name: 'Add Client',
+        to:'/client/addclient'
+      },
+      {
+        component:CNavItem,
+        name: 'List Client',
+        to:'/client/listclient'
+      }
+    ]
+  },{
+    component: CNavGroup,
+    name: 'Payroll Process',
+    icon: <CIcon icon={cilNotes} customClassName="nav-icon"  />,
+    items:[
+      {
+        component:CNavItem,
+        name: 'Assign Employee to Client',
+        to:'/employee/addemployee'
+      },
+      {
+        component:CNavItem,
+        name: 'Attendance Sheet',
+        to:'/employee/listemployee'
+      },
+      {
+        component:CNavItem,
+        name: 'Expenses',
+        to:'/employee/listemployee'
+      }
+    ]
+  },{
+    component: CNavGroup,
+    name: 'Reports',
+    icon: <CIcon icon={cilChartPie} customClassName="nav-icon"  />,
+    items:[
+      {
+        component:CNavItem,
+        name: 'Collection Outstanding',
+        to:'/employee/addemployee'
+      },
+      {
+        component:CNavItem,
+        name: 'LULU Exchange',
+        to:'/employee/listemployee'
+      },
+      {
+        component:CNavItem,
+        name: 'Monthly Expense Report',
+        to:'/employee/listemployee'
+      },,
+      {
+        component:CNavItem,
+        name: 'Invoice Generation',
+        to:'/employee/listemployee'
+      },,
+      {
+        component:CNavItem,
+        name: 'Salary Sheet',
+        to:'/employee/listemployee'
+      }
+    ]
+  }
+  /*,
   {
     component: CNavTitle,
     name: 'Theme',
@@ -317,7 +386,7 @@ const _nav = [
     name: 'Docs',
     href: 'https://coreui.io/react/docs/templates/installation/',
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
-  },
+  },*/
 ]
 
 export default _nav
