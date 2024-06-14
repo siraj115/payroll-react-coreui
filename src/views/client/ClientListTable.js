@@ -51,7 +51,7 @@ const ClientListTable = ({tblheading, users})=>{
                             <CTableHead>
                             <CTableRow>
                                 <CTableHeaderCell scope="col">S.No</CTableHeaderCell>
-                                <CTableHeaderCell scope="col">Contact Person</CTableHeaderCell>
+                                <CTableHeaderCell scope="col">Company Name</CTableHeaderCell>
                                 <CTableHeaderCell scope="col">Phone No</CTableHeaderCell>
                                 <CTableHeaderCell scope="col">TRN</CTableHeaderCell>
                                 <CTableHeaderCell scope="col">Action</CTableHeaderCell>

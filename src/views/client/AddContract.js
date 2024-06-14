@@ -12,8 +12,7 @@ import {
     CFormInput,
     CFormFeedback,
     CFormLabel,
-    CFormSelect,
-    CFormTextarea,
+    CSpinner,
     CToaster,
     CTooltip,
   } from '@coreui/react'
@@ -32,6 +31,7 @@ const AddContract = ()=>{
     const [btnname, setBtnname] = useState('Save')
     const [clientCotractData, setClientCotractData] = useState({});
     const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
+    const [showLoading, setShowLoading]=useState(false)
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
@@ -42,6 +42,7 @@ const AddContract = ()=>{
     const endDate = watch("contractend");
     const onSubmit = async (data) =>{
         try{
+            setShowLoading(true)
             console.log('fgfg',data);//return false;
             const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/saveclientcontract`
             //console.log(url)    
@@ -57,6 +58,7 @@ const AddContract = ()=>{
                 const user_toast = <UserToaster color='danger' msg={response?.data?.msg} />
                 addToast(user_toast)
             }
+            setShowLoading(false)
         }catch(err){
 
         }
@@ -184,9 +186,16 @@ const AddContract = ()=>{
                     
                     <CCol xs={12}>
                         <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <CButton color="primary" className="me-md-2" type='submit'>
-                            {btnname}
-                            </CButton>
+                            
+                            { !showLoading ?
+                                <CButton color="primary" className="me-md-2" type="submit">
+                                  {btnname}
+                                </CButton>
+                                :
+                                <CButton color="primary" disabled>
+                                    <CSpinner as="span" size="sm" aria-hidden="true" />
+                                </CButton>
+                            }
                         </div>
                     </CCol>
                 </CForm>

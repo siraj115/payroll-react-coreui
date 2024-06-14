@@ -66,7 +66,7 @@ const _nav = [
       {
         component:CNavItem,
         name: 'Assign Employee to Client',
-        to:'/employee/addemployee'
+        to:'/assignemployee/assignemployee'
       },
       {
         component:CNavItem,
