@@ -64,6 +64,9 @@ const ListEmployee  = React.lazy(() => import('./views/employees/ListEmployee'))
 const AddClient   = React.lazy(() => import('./views/client/AddClient'))
 const ListClient  = React.lazy(() => import('./views/client/ListClient'))
 
+// Assign Employee
+const AssignEmployee  = React.lazy(() => import('./views/assignemployee/AssignEmployee'))
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
@@ -116,6 +119,7 @@ const routes = [
   { path: '/client/addclient', name: 'Add Client', element: AddClient },
   { path: '/client/addclient/:clientid', name: 'Edit Client', element: AddClient },
   { path: '/client/listclient', name: 'List Client', element: ListClient },
+  { path: '/assignemployee/assignemployee', name: 'Assign Employee', element: AssignEmployee },
 ]
 
 export default routes

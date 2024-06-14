@@ -15,7 +15,8 @@ import {
   CFormSelect,
   CFormTextarea,
   CToaster,
-  CTooltip
+  CTooltip,
+  CSpinner
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
@@ -27,8 +28,8 @@ import {useForm} from "react-hook-form";
 import axios from 'axios';
 import UserToaster from '../../utils/UserToaster';
 
-const EmployeeDetailForm = ()=>{
-    const navigate = useNavigate('/');
+const EmployeeDetailForm = ({userdata, reload})=>{
+    const nav = useNavigate();
     const [toast, addToast] = useState(0);
     const [empdata, setEmpdata] = useState({});
     const [btnname, setBtnname] = useState('Save')
@@ -38,7 +39,7 @@ const EmployeeDetailForm = ()=>{
     const {empid} = useParams();
     const login_userid = Cookies.get('loggedinuserid');
     const token = Cookies.get('accessToken');
-   
+    const [showLoading, setShowLoading]=useState(false)
     //console.log(errors)
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
@@ -46,6 +47,7 @@ const EmployeeDetailForm = ()=>{
     
     const onSubmit = async (data) =>{
         try{
+            setShowLoading(true)
             console.log(data);//return false;
             const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/saveuser`
             console.log(url)    
@@ -61,16 +63,21 @@ const EmployeeDetailForm = ()=>{
             if(response?.data?.errortype ===1){
                 const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
                 addToast(user_toast)
-                
-                setTimeout(
-                    ()=>{
-                        //window.location.href=`#/employee/addemployee/${response?.data?.userid}`
-                        window.location.href=`${window.location.origin}/employee/addemployee/${response?.data?.userid}`
-                    },1000)
+                if(response?.data?.type =='insert'){
+                    setTimeout(
+                        ()=>{
+                            //window.location.href=`#/employee/addemployee/${response?.data?.userid}`
+                            //window.location.href=`${window.location.origin}/employee/addemployee/${response?.data?.userid}`
+                            nav(`/employee/addemployee/${response?.data?.userid}`)
+                        },1000)
+                }else{
+                    reload()
+                }
             }else if(response?.data?.errortype ===2){
                 const user_toast = <UserToaster color='danger' msg={response?.data?.msg} />
                 addToast(user_toast)
             }
+            setShowLoading(false)
         }catch(err){
            // console.log(err.response.data.errortype)
             if(err?.response?.data?.errortype ===2){
@@ -83,29 +90,25 @@ const EmployeeDetailForm = ()=>{
         }
     }
     
-    const UserData = async (empid) =>{
-        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/getuser/${empid}`
-       // console.log(url)    
-       const headers = {
-            headers: {'Authorization':token}
-        }
-        let response = await axios.get(url,headers)
-        console.log(response.data.data)
-        const users = response.data.data;
-        setEmpdata((response.data.data))
-        setValue("empno",users.empno)
-        setValue("name",users.name)
-        setValue("dob",users.dob)
-        setValue("gender",users.gender)
-        setValue("address",users.address)
-        setValue("country",users.country)
-        setValue("phone",users.phoneno)
-        setValue("workphone",users.workphone)
-        setValue("email",users.email)
-        setValue("emp_type",users.employee_type)
-        setValue("emp_role",users.employee_role)
-        setValue("salary",users.salary)
-        setValue("canlogin",(users.canlogin)?true:false)
+    const UserData = async (users) =>{
+        
+        setValue("empno",users?.empno)
+        setValue("name",users?.name)
+        setValue("dob",users?.dob)
+        setValue("gender",users?.gender)
+        setValue("address",users?.address)
+        setValue("country",users?.country)
+        setValue("phone",users?.phoneno)
+        setValue("workphone",users?.workphone)
+        setValue("email",users?.email)
+        setValue("emp_type",users?.employee_type)
+        setValue("emp_role",users?.employee_role)
+        setValue("salary",users?.salary)
+        setValue("datejoining",(users?.datejoining))
+        if(Object.keys(users).length)
+            setValue("canlogin",(users?.canlogin)?true:false)
+        else
+            setValue("canlogin",null)
         
     }
    
@@ -113,10 +116,24 @@ const EmployeeDetailForm = ()=>{
         if(empid!=null){
             console.log(empid)
             setBtnname('Update')
-            UserData(empid)
             
+        }else{
+            setBtnname('Save')
+            setEmpdata({})
+            UserData({})
         }
-    },[setValue])
+    },[empid])
+
+    useEffect(()=>{
+        if(userdata){
+            setEmpdata(userdata)
+            UserData(userdata)
+        }else{
+            setEmpdata({})
+            UserData({})
+        }
+
+    },[userdata])
     
    // console.log(empdata)
     const handleSelectCountry = (e)=>{
@@ -291,9 +308,15 @@ return(
                 
                     <CCol xs={12}>
                         <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <CButton color="primary" className="me-md-2" type='submit'>
-                            {btnname}
-                            </CButton>
+                            { !showLoading ?
+                                <CButton color="primary" className="me-md-2" type='submit'>
+                                {btnname}
+                                </CButton>
+                                :
+                                <CButton color="primary" disabled>
+                                    <CSpinner as="span" size="sm" aria-hidden="true" />
+                                </CButton>
+                            }
                         </div>
                     </CCol>
                 </CForm>

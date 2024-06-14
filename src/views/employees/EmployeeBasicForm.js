@@ -8,7 +8,8 @@ import {
     CFormFeedback,
     CFormLabel,
     CToaster,
-    CTooltip
+    CTooltip,
+    CSpinner
   } from '@coreui/react'
   import CIcon from '@coreui/icons-react'
   import {
@@ -18,10 +19,11 @@ import {useForm} from "react-hook-form";
 import {useParams} from 'react-router-dom'
 import axios from "axios";
 import UserToaster from '../../utils/UserToaster';
-const EmployeeBasicForm = ()=>{
+const EmployeeBasicForm = ({userbasic})=>{
     const [toast, addToast] = useState(0);
     const toaster = useRef()
     const [empbasicdata, setEmpbasicdata] = useState({});
+    const [showLoading, setShowLoading]=useState(false)
     const {empid} = useParams();
     const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
     const headers = {
@@ -31,6 +33,7 @@ const EmployeeBasicForm = ()=>{
     const login_userid = Cookies.get('loggedinuserid');
     const token = Cookies.get('accessToken');
     const onSubmit = async (data) =>{
+        setShowLoading(true)
        console.log(data);
        //return false;
        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/savebasicdetails`
@@ -50,19 +53,9 @@ const EmployeeBasicForm = ()=>{
             const user_toast = <UserToaster color='danger' msg={response?.data?.msg} />
             addToast(user_toast)
         }
+        setShowLoading(false)
     }
-    const UserBasicData = async (empid) =>{
-        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/getuserbasic/${empid}`
-       // console.log(url)    
-       const headers = {
-            headers: {'Authorization':token}
-        }
-        let response = await axios.get(url,headers)
-        console.log(response.data.data)
-        const users = response.data.data;
-        if(users!=null){
-            setEmpbasicdata(users)
-        }
+    const UserBasicData = async (users) =>{
         setValue("passport",users?.passport)
         setValue("passport_expiry",users?.passport_expiry)
         setValue("visano",users?.visano)
@@ -79,10 +72,16 @@ const EmployeeBasicForm = ()=>{
         if(empid!=null){
             console.log(empid)
             //setBtnname('Update')
-            UserBasicData(empid)
+           // UserBasicData(empid)
             
         }
     },[setValue])
+    useEffect(()=>{
+        if(userbasic){
+            setEmpbasicdata(userbasic)
+            UserBasicData(userbasic)
+        }
+    })
     return(
         <CCol xs={12}>
             <CToaster className="p-3" placement="top-end" push={toast} ref={toaster} />
@@ -197,9 +196,15 @@ const EmployeeBasicForm = ()=>{
                 
                 <CCol xs={12}>
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                    { !showLoading ?
                         <CButton color="primary" className="me-md-2" type="submit">
                         Save
                         </CButton>
+                        :
+                        <CButton color="primary" disabled>
+                            <CSpinner as="span" size="sm" aria-hidden="true" />
+                        </CButton>
+                    }
                     </div>
                 </CCol>
             </CForm>     

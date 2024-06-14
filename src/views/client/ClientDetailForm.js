@@ -15,18 +15,20 @@ import {
     CFormSelect,
     CFormTextarea,
     CToaster,
-    CTooltip
+    CSpinner
   } from '@coreui/react'
 import {useForm} from "react-hook-form";
 import axios from 'axios';
 import UserToaster from '../../utils/UserToaster';
 const ClientDetailForm = ()=>{
+    const nav = useNavigate()
     const [btnname, setBtnname] = useState('Save')
     const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
     const {clientid} = useParams();
     const [toast, addToast] = useState(0);
     const toaster = useRef()
     const [clientdata, setClientdata] = useState({});
+    const [showLoading, setShowLoading]=useState(false)
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
@@ -34,6 +36,7 @@ const ClientDetailForm = ()=>{
     const token = Cookies.get('accessToken');
     const onSubmit = async (data) =>{
         try{
+            setShowLoading(true)
             console.log('data',data);//return false;
             const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/saveclient`
             console.log(url)    
@@ -50,12 +53,17 @@ const ClientDetailForm = ()=>{
             if(response?.data?.errortype ===1){
                 const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
                 addToast(user_toast)
+                if(response?.data?.type =='insert'){
                 setTimeout(
                     ()=>{
-                        window.location.href=`${window.location.origin}/client/addclient/${response?.data?.clientid}`
+                        nav(`/client/addclient/${response?.data?.clientid}`)
+                        //window.location.href=`${window.location.origin}/client/addclient/${response?.data?.clientid}`
                     },1000)
-                //setTimeout(function(){navigate(`/client/addclient/${response?.data?.clientid}`)},1000)
+                }else{
+                    ClientData(clientid)
+                }
             }
+            setShowLoading(false)
         }catch(err){
 
         }
@@ -70,23 +78,28 @@ const ClientDetailForm = ()=>{
         console.log(response.data.data)
         const users = response.data.data;
         setClientdata((response.data.data))
-        setValue("companyname",users.companyname)
-        //setValue("contactname",users.contactname)
-        setValue("contactphone",users.contactphone)
-        setValue("contactemail",users.contactemail)
-        setValue("address",users.address)
-        setValue("companytrn",users.companytrn)
+        
         
     }
+    useEffect(()=>{
+        setValue("companyname",clientdata?.companyname)
+        //setValue("contactname",users.contactname)
+        setValue("contactphone",clientdata?.contactphone)
+        setValue("contactemail",clientdata?.contactemail)
+        setValue("address",clientdata?.address)
+        setValue("companytrn",clientdata?.companytrn)
+    },[clientdata])
    
     useEffect(()=>{
         if(clientid!=null){
             console.log(clientid)
             setBtnname('Update')
             ClientData(clientid)
-            
+        }else{
+            setClientdata({}) 
+            setBtnname('Save')
         }
-    },[setValue])
+    },[clientid])
     return(
         
     <CCol xs={12}>
@@ -135,9 +148,16 @@ const ClientDetailForm = ()=>{
                     </CCol>
                     <CCol xs={12}>
                         <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <CButton color="primary" className="me-md-2" type='submit'>
-                            {btnname}
-                            </CButton>
+                            
+                            { !showLoading ?
+                                <CButton color="primary" className="me-md-2" type="submit">
+                                  {btnname}
+                                </CButton>
+                                :
+                                <CButton color="primary" disabled>
+                                    <CSpinner as="span" size="sm" aria-hidden="true" />
+                                </CButton>
+                            }
                         </div>
                     </CCol>
                 </CForm>
