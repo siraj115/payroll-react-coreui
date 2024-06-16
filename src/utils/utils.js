@@ -7,4 +7,9 @@ const calculateDaysRemaining = (startdate,enddate)=>{
   console.log(startDate,endDate)
   return (endDate - startDate) / (1000 * 60 * 60 * 24);;
 }
-  export {capitalizeFirstLetter, calculateDaysRemaining}
+const formattedDate = (dateStr)=>{
+  const options = { day: '2-digit', month: 'long', year: 'numeric' };
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-GB',options)
+}
+  export {capitalizeFirstLetter, calculateDaysRemaining, formattedDate}
