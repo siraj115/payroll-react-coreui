@@ -7,6 +7,7 @@ import {
     CCardBody,
     CCardHeader,
     CCol,
+    CRow ,
     CForm,
     CFormCheck,
     CFormInput,
@@ -18,22 +19,39 @@ import {
     CSpinner,
     CListGroup,
     CListGroupItem,
-    CBadge 
+    CBadge ,
+    CTable,
+    CTableBody,
+    CTableCaption,
+    CTableDataCell,
+    CTableHead,
+    CTableHeaderCell,
+    CTableRow,
   } from '@coreui/react'
-import {useForm} from "react-hook-form";
+  import CIcon from '@coreui/icons-react'
+  import {cilCalendar} from '@coreui/icons'
+import {useForm, Controller } from "react-hook-form";
 //import  CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import axios from 'axios';
 import UserToaster from '../../utils/UserToaster';
+import {capitalizeFirstLetter, formattedDate} from "../../utils/utils"
 const AssignEmployee = ()=>{
     const nav = useNavigate()
     const [btnname, setBtnname] = useState('Save')
-    const {register, handleSubmit, watch, formState:{errors}, setValue} = useForm()
-    const {clientid} = useParams();
+    const {register, handleSubmit, watch, formState:{errors}, setValue, control, setError,clearErrors } = useForm()
     const [toast, addToast] = useState(0);
     const toaster = useRef()
     const [clientdata, setClientdata] = useState([]);
+    const [singleClientData, setSingleClientData] = useState({});
+    const [contractDetails, setContractDetails] = useState({});
+    const [isClientData, setisClientData] = useState(0);
     const [showLoading, setShowLoading]=useState(false)
+    const [showClientLoading, setShowClientLoading]=useState(false)
+    const [selectedClient, setSelectedClient]=useState('')
+    const [superVisor, setSuperVisor] = useState({})
+    const [maleEmployees, setMaleEmployees] = useState({})
+    const [feMaleEmployees, setFeMaleEmployees] = useState({})
     const headers = {
         headers: {'Content-Type':'multipart/form-data'}
     }
@@ -41,15 +59,14 @@ const AssignEmployee = ()=>{
     const token = Cookies.get('accessToken');
     const onSubmit = async (data) =>{
         try{
-            setShowLoading(true)
-            console.log('data',data);//return false;
-            const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/saveclient`
+            //setShowLoading(true)
+            const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/assignemployee`
             console.log(url)    
-            if(clientid!=null)
-                data.id = clientid;
-
+           
             data.login_userid = login_userid;
-            
+            data.clientid   = selectedClient;
+            data.contractid   = contractDetails.id;
+            console.log('data',data);//return false;
             const headers = {
                 headers: {'Authorization':token}
             }
@@ -79,14 +96,17 @@ const AssignEmployee = ()=>{
        const headers = {
             headers: {'Authorization':token}
         }
-        let response = await axios.get(url,headers)
-        console.log(response.data.data)
-        const clients = response.data.data;
-        const clientDet = clients.map((client)=>({
-            value: client.id,
-            label: client.companyname
-        }))
-        setClientdata(clientDet)
+        await axios.get(url,headers)
+        .then((response)=>{
+            console.log(response.data.data)
+            const clients = response.data.data;
+            const clientDet = clients.map((client)=>({
+                value: client.id,
+                label: client.companyname
+            }))
+            setClientdata(clientDet)
+        })
+        
         
     }
    
@@ -101,14 +121,116 @@ const AssignEmployee = ()=>{
         console.log(e.value)
         console.log(e.label)
         if(e.value!=''){
+            setShowClientLoading(true)
             const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/getclientdetails/${e.value}`
-            // console.log(url)    
+            setSelectedClient(e.value) 
             const headers = {
                 headers: {'Authorization':token}
             }
-            let response = await axios.get(url,headers)
+            await axios.get(url,headers)
+            .then((response)=>{
+                const client  = response.data.data;
+                console.log(client)
+                console.log(client.contractdetails.length)
+                setisClientData(client.contractdetails.length?true:false)
+                let resContractDetails = {}
+                if(client.contractdetails.length){
+                    resContractDetails = client.contractdetails[0];
+                    setContractDetails(resContractDetails)
+                    delete client.contractdetails
+                    setSingleClientData(client)
+                    
+                }else{
+                    setSingleClientData({})
+                    setContractDetails({})
+                }    
+                setShowClientLoading(false)
+                return resContractDetails;
+            })
+        
+                
         }
     }
+    const handleClientChange = (selectedOptions, emprole)=>{
+        console.log(selectedOptions)
+        console.log(emprole)
+        console.log(contractDetails)
+        let maxSelection = 0;
+        let employeetype = ''
+        if(emprole=='supervisor'){
+            maxSelection =contractDetails.countsupervisor 
+            employeetype = 'Supervisor(s)'
+        }else if(emprole=='maleemp'){
+            maxSelection =contractDetails.countmale 
+            employeetype = 'Male(s)'
+        }else if(emprole=='femaleemp'){
+            maxSelection =contractDetails.countfemale 
+            employeetype = 'Female(s)'
+        }
+        console.log(maxSelection)
+        
+        if(selectedOptions.length>maxSelection){
+            setError(emprole, {
+                type: 'manual',
+                message: `You can select up to ${maxSelection}  ${employeetype} only.`
+            });
+        }else{
+            clearErrors(emprole);
+            setValue(emprole,(selectedOptions))
+        }
+    }
+    useEffect(()=>{
+        console.log(contractDetails)
+        console.log(superVisor)
+        console.log(maleEmployees)
+        console.log(feMaleEmployees)
+    },[contractDetails,superVisor,maleEmployees,feMaleEmployees])
+
+    const getSuperVisorData  = async ()=>{
+        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/listuser/Supervisor`
+        const headers = {
+            headers: {'Authorization':token}
+        }
+        const getSuperVisorApi = await axios.get(url,headers)
+        const getSuperVisor = getSuperVisorApi.data.data
+        console.log(getSuperVisor)
+        const superVisor = getSuperVisor.map((client)=>({
+            value: client.id,
+            label: capitalizeFirstLetter(`${client.name} (${client.empno})`)
+        }))
+        setSuperVisor(superVisor)
+    }
+    useEffect(()=>{
+        getSuperVisorData()
+    },[])
+    const getCleanerData= async ()=>{
+        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/listuser/Cleaner`
+        const headers = {
+            headers: {'Authorization':token}
+        }
+        const getSuperVisorApi = await axios.get(url,headers)
+        const getSuperVisor = getSuperVisorApi.data.data
+        console.log('cleaner')
+        console.log(getSuperVisor)
+        const maleEmployeesArr = getSuperVisor.filter(emp=> emp.gender==='male')
+        console.log(maleEmployeesArr)
+        const femaleEmployeesArr = getSuperVisor.filter(emp=> emp.gender==='female')
+       
+        const maleEmployeesdata = maleEmployeesArr.map((client)=>({
+            value: client.id,
+            label: capitalizeFirstLetter(`${client.name} (${client.empno})`)
+        }))
+        console.group(maleEmployeesdata)
+        const femaleEmployeesdata = femaleEmployeesArr.map((client)=>({
+            value: client.id,
+            label: capitalizeFirstLetter(`${client.name} (${client.empno})`)
+        }))
+        setMaleEmployees(maleEmployeesdata)
+        setFeMaleEmployees(femaleEmployeesdata)
+    }
+    useEffect(()=>{
+        getCleanerData()
+    },[])
     return(
         
     <CCol xs={12}>
@@ -133,77 +255,125 @@ const AssignEmployee = ()=>{
                                 id="companyname"
                                 name="companyname"
                             />
+                            <CSpinner size="sm" className={!showClientLoading?'visually-hidden':""}/>
                         <CFormFeedback valid>Looks good!</CFormFeedback>
                         {errors.companyname && <code color="danger">{errors.companyname?.message}</code>}
                     </CCol>
                     
-                    <CCol xs={12}>
-                        <CListGroup className="mb-2" layout='horizontal' >
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Supervisor
-                            </CListGroupItem>
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Male
-                            </CListGroupItem>
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Female
-                            </CListGroupItem>
-                        </CListGroup>
-                        <CListGroup className="mb-2" layout='horizontal' >
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Supervisor
-                                <CBadge color="primary" shape="rounded-pill">
-                                14
-                                </CBadge>
-                            </CListGroupItem>
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Male
-                                <CBadge color="primary" shape="rounded-pill">
-                                2
-                                </CBadge>
-                            </CListGroupItem>
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Female
-                                <CBadge color="primary" shape="rounded-pill">
-                                1
-                                </CBadge>
-                            </CListGroupItem>
-                        </CListGroup>
-                        <CListGroup className="mb-2" layout='horizontal' >
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Supervisor
-                                <CBadge color="primary" shape="rounded-pill">
-                                14
-                                </CBadge>
-                            </CListGroupItem>
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Male
-                                <CBadge color="primary" shape="rounded-pill">
-                                2
-                                </CBadge>
-                            </CListGroupItem>
-                            <CListGroupItem className="d-flex justify-content-between align-items-center">
-                                Female
-                                <CBadge color="primary" shape="rounded-pill">
-                                1
-                                </CBadge>
-                            </CListGroupItem>
-                        </CListGroup>
-                    </CCol>
-                    <CCol xs={12}>
-                        <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <CCol xs={12}>
                             
-                            { !showLoading ?
-                                <CButton color="primary" className="me-md-2" type="submit">
-                                  {btnname}
-                                </CButton>
-                                :
-                                <CButton color="primary" disabled>
-                                    <CSpinner as="span" size="sm" aria-hidden="true" />
-                                </CButton>
-                            }
-                        </div>
-                    </CCol>
+                            
+                                {isClientData ?
+                                    <>
+                                        <CTable borderless>
+                                        
+                                            <CTableBody>
+                                                <CTableRow color="info">
+                                                    <CTableDataCell>Company Name: <strong> {singleClientData.companyname} </strong></CTableDataCell>
+                                                    <CTableDataCell>TRN: <strong> {singleClientData.companytrn} </strong></CTableDataCell>
+                                                    <CTableDataCell>Start Date:  <strong> {formattedDate(contractDetails.contractstart)} </strong>  </CTableDataCell>
+                                                    <CTableDataCell>End Date: <strong>  {formattedDate(contractDetails.contractend)} </strong> </CTableDataCell>
+                                                
+                                                </CTableRow>
+                                                
+                                                <CTableRow color="info">
+                                                    <CTableDataCell>Supervisor Count: <strong>  {contractDetails.countsupervisor} </strong> </CTableDataCell>
+                                                    <CTableDataCell>Male Count:  <strong> {contractDetails.countmale} </strong> </CTableDataCell>
+                                                    <CTableDataCell colSpan={2}>Female Count: <strong>  {contractDetails.countfemale} </strong> </CTableDataCell>
+                                                </CTableRow>
+                                            
+                                            </CTableBody>
+                                        </CTable>
+                                        <CRow className="mt-4">
+                                            <CCol md={4}>
+                                                <CFormLabel htmlFor="supervisor">Supervisor <code color="danger">*</code></CFormLabel>
+                                                <Controller
+                                                    name="supervisor"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            {...field}
+                                                            {...register("supervisor",{required:"Supervisor is required"})}
+                                                            options={superVisor}
+                                                            isMulti
+                                                            onChange={(selectedOptions) => handleClientChange(selectedOptions, 'supervisor')}
+                                                            placeholder="Select Supervisor"
+                                                        />
+                                                    )}
+                                                />
+                                                <CFormFeedback valid>Looks good!</CFormFeedback>
+                                                {errors.supervisor && <code color="danger">{errors.supervisor?.message}</code>}
+                                            </CCol>
+                                            
+                                            <CCol md={4}>
+                                                <CFormLabel htmlFor="maleemp">Male Employee <code color="danger">*</code></CFormLabel>
+                                                <Controller
+                                                    name="maleemp"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            {...field}
+                                                            {...register("maleemp",{required:"Male Empoloyee is required"})}
+                                                            options={maleEmployees}
+                                                            isMulti
+                                                            onChange={(selectedOptions) => handleClientChange(selectedOptions, 'maleemp')}
+                                                            placeholder="Select Male Employee"
+                                                        />
+                                                    )}
+                                                />
+                                                <CFormFeedback valid>Looks good!</CFormFeedback>
+                                                {errors.maleemp && <code color="danger">{errors.maleemp?.message}</code>}
+                                            </CCol>
+                                            <CCol md={4}>
+                                                <CFormLabel htmlFor="femaleemp">Female Employee <code color="danger">*</code></CFormLabel>
+                                                <Controller
+                                                    name="femaleemp"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            {...field}
+                                                            {...register("femaleemp",{required:"Female Empoloyee is required"})}
+                                                            options={feMaleEmployees}
+                                                            isMulti
+                                                            onChange={(selectedOptions) => handleClientChange(selectedOptions, 'femaleemp')}
+                                                            placeholder="Select Female Employee"
+                                                        />
+                                                    )}
+                                                />
+                                                <CFormFeedback valid>Looks good!</CFormFeedback>
+                                                {errors.femaleemp && <code color="danger">{errors.femaleemp?.message}</code>}
+                                            </CCol>
+                                            <CCol xs={12} className="mt-3">
+                                            <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                
+                                                { !showLoading ?
+                                                    <CButton color="primary" className="me-md-2" type="submit">
+                                                    {btnname}
+                                                    </CButton>
+                                                    :
+                                                    <CButton color="primary" disabled>
+                                                        <CSpinner as="span" size="sm" aria-hidden="true" />
+                                                    </CButton>
+                                                }
+                                            </div>
+                                        </CCol>
+                                        </CRow>
+
+                                        
+                                    </>
+                                    :
+                                    <CTable>
+                                        <CTableBody color="danger">
+                                            <CTableRow>
+                                            {selectedClient? <CTableDataCell> Contract is not assigned </CTableDataCell>:null}
+                                            </CTableRow>
+                                        </CTableBody>
+                                    </CTable>
+                                }
+                        </CCol>
+                        
+                    
+                    
                 </CForm>
             </CCardBody>
         </CCard>
