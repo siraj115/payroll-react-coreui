@@ -35,6 +35,7 @@ import {useForm, Controller } from "react-hook-form";
 import Select from 'react-select';
 import axios from 'axios';
 import UserToaster from '../../utils/UserToaster';
+import ClientContractDetailTable from "../client/ClientContractDetailTable";
 import {capitalizeFirstLetter, formattedDate} from "../../utils/utils"
 const AssignEmployee = ()=>{
     const nav = useNavigate()
@@ -75,15 +76,12 @@ const AssignEmployee = ()=>{
             if(response?.data?.errortype ===1){
                 const user_toast = <UserToaster color='success' msg={response?.data?.msg} />
                 addToast(user_toast)
-                if(response?.data?.type =='insert'){
+                
                 setTimeout(
                     ()=>{
-                        nav(`/client/addclient/${response?.data?.clientid}`)
-                        //window.location.href=`${window.location.origin}/client/addclient/${response?.data?.clientid}`
-                    },1000)
-                }else{
-                    ClientData(clientid)
-                }
+                        window.location.reload()
+                    },2000)
+                
             }
             setShowLoading(false)
         }catch(err){
@@ -91,7 +89,7 @@ const AssignEmployee = ()=>{
         }
     }
     const ClientData = async () =>{
-        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/allclientnames`
+        const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}client/allclientnames/notassigned`
        // console.log(url)    
        const headers = {
             headers: {'Authorization':token}
@@ -130,8 +128,11 @@ const AssignEmployee = ()=>{
             await axios.get(url,headers)
             .then((response)=>{
                 const client  = response.data.data;
+                const assigned_employees = response.data?.assigned_employees;
+                const employeeDetails   = response.data?.employeeDetails;
                 console.log(client)
                 console.log(client.contractdetails.length)
+                console.log('assigned_employees', assigned_employees)
                 setisClientData(client.contractdetails.length?true:false)
                 let resContractDetails = {}
                 if(client.contractdetails.length){
@@ -145,12 +146,25 @@ const AssignEmployee = ()=>{
                     setContractDetails({})
                 }    
                 setShowClientLoading(false)
-                return resContractDetails;
+                console.log('supervisor',assigned_employees?.supervisor)// siraj start here. Assign employee details in assigned_employees variable on getting data
+                const assigned_supervisor  = assigned_employees?.supervisor.map((assigned)=>{
+                    console.log(assigned.employee_id)
+                    //const findEmployee = employeeDetails.find((ele)=> ele.employee_id==assigned.id)
+                    const findEmployee = employeeDetails.find((ele)=> (ele.id==assigned.employee_id))
+                    return (findEmployee?{label:findEmployee.name, value:findEmployee.id}:null)
+                })||[];
+                console.log(assigned_supervisor)
+                setValue('supervisor',assigned_supervisor)
+                //return resContractDetails;
             })
         
                 
         }
+        setValue('supervisor',[])
+        setValue('maleemp',[])
+        setValue('femaleemp',[])
     }
+    
     const handleClientChange = (selectedOptions, emprole)=>{
         console.log(selectedOptions)
         console.log(emprole)
@@ -179,12 +193,9 @@ const AssignEmployee = ()=>{
             setValue(emprole,(selectedOptions))
         }
     }
-    useEffect(()=>{
-        console.log(contractDetails)
-        console.log(superVisor)
-        console.log(maleEmployees)
-        console.log(feMaleEmployees)
-    },[contractDetails,superVisor,maleEmployees,feMaleEmployees])
+    /*useEffect(()=>{
+        console.log(contractDetails)        console.log(superVisor)        console.log(maleEmployees)        console.log(feMaleEmployees)
+    },[contractDetails,superVisor,maleEmployees,feMaleEmployees])*/
 
     const getSuperVisorData  = async ()=>{
         const url = `${import.meta.env.VITE_APP_PAYROLL_BASE_URL}user/listuser/Supervisor`
@@ -265,25 +276,8 @@ const AssignEmployee = ()=>{
                             
                                 {isClientData ?
                                     <>
-                                        <CTable borderless>
+                                        <ClientContractDetailTable singleClientData={singleClientData} contractDetails={contractDetails} />
                                         
-                                            <CTableBody>
-                                                <CTableRow color="info">
-                                                    <CTableDataCell>Company Name: <strong> {singleClientData.companyname} </strong></CTableDataCell>
-                                                    <CTableDataCell>TRN: <strong> {singleClientData.companytrn} </strong></CTableDataCell>
-                                                    <CTableDataCell>Start Date:  <strong> {formattedDate(contractDetails.contractstart)} </strong>  </CTableDataCell>
-                                                    <CTableDataCell>End Date: <strong>  {formattedDate(contractDetails.contractend)} </strong> </CTableDataCell>
-                                                
-                                                </CTableRow>
-                                                
-                                                <CTableRow color="info">
-                                                    <CTableDataCell>Supervisor Count: <strong>  {contractDetails.countsupervisor} </strong> </CTableDataCell>
-                                                    <CTableDataCell>Male Count:  <strong> {contractDetails.countmale} </strong> </CTableDataCell>
-                                                    <CTableDataCell colSpan={2}>Female Count: <strong>  {contractDetails.countfemale} </strong> </CTableDataCell>
-                                                </CTableRow>
-                                            
-                                            </CTableBody>
-                                        </CTable>
                                         <CRow className="mt-4">
                                             <CCol md={4}>
                                                 <CFormLabel htmlFor="supervisor">Supervisor <code color="danger">*</code></CFormLabel>

@@ -70,7 +70,7 @@ const AddContract = ()=>{
             headers: {'Authorization':token}
         }
         let response = await axios.get(url,headers)
-        console.log(response.data.data)
+        //console.log(response.data.data)
         const users = response.data.data;
         if(users!=null){
             setClientCotractData(users)
